@@ -1,0 +1,43 @@
+pluginManagement {
+    repositories {
+        gradlePluginPortal()
+        mavenCentral()
+    }
+}
+
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.PREFER_PROJECT)
+    repositories {
+        mavenCentral()
+        mavenLocal()
+        maven {
+            name "GitHub-StrataFrameworkSet-Packages"
+            url "https://maven.pkg.github.com/StrataFrameworkSet/repository"
+            credentials {
+                username = "$System.env.REPOSITORY_USER"
+                password = "$System.env.REPOSITORY_PASSWORD"
+            }
+        }
+        maven {
+            name "Confluent"
+            url "https://packages.confluent.io/maven"
+        }
+        maven {
+            name "Jabylon"
+            url "https://www.jabylon.org/maven/"
+        }
+    }
+}
+rootProject.name = 'Strata.Stream'
+
+// Components
+include 'Components:Strata.Stream.Core'
+include 'Components:Strata.Stream.Basic'
+include 'Components:Strata.Stream.Flink'
+include 'Components:Strata.Stream.Kafka'
+
+// Tests
+include 'Tests:Strata.Stream.CoreTest'
+include 'Tests:Strata.Stream.BasicTest'
+include 'Tests:Strata.Stream.FlinkTest'
+include 'Tests:Strata.Stream.KafkaTest'
