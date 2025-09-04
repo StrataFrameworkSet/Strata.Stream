@@ -1,0 +1,27 @@
+plugins {
+    id 'java-library'
+}
+
+sourceSets {
+    main.java.srcDirs = ['src/unused']
+    main.resources.srcDirs = ['src/unused']
+    test.java.srcDirs = ['src/test/java']
+    test.resources.srcDirs = ['src/test/resources']
+}
+
+group 'strata.stream'
+version '1.0-SNAPSHOT'
+
+dependencies {
+    testImplementation project(':Components:Strata.Stream.Basic')
+    testImplementation(testFixtures(project(':Tests:Strata.Stream.CoreTest')))
+    testImplementation "org.junit.jupiter:junit-jupiter-params:$junit_jupiter_version"
+    testImplementation "org.junit.jupiter:junit-jupiter-api:$junit_jupiter_version"
+    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$junit_jupiter_version"
+}
+
+test {
+    useJUnitPlatform {
+        includeTags("CommitStage")
+    }
+}

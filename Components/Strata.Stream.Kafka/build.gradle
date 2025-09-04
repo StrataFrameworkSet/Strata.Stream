@@ -1,0 +1,47 @@
+plugins {
+    id 'java-library'
+}
+
+sourceSets {
+    main.java.srcDirs = ['src/main/java']
+    main.resources.srcDirs = ['src/main/resources']
+    test.java.srcDirs = ['src/unused']
+    test.resources.srcDirs = ['src/unused']
+}
+
+apply plugin: 'maven-publish'
+
+group 'strata.stream'
+version "$major$minor$patch"
+
+task sourceJar(type: Jar) {
+    from sourceSets.main.allJava
+}
+
+publishing {
+    publications {
+        StrataStreamFlink(MavenPublication) {
+            artifactId = 'strata-stream-kafka'
+            from components.java
+
+            repositories {
+                maven {
+                    name "GitHubPackages"
+                    url "https://maven.pkg.github.com/StrataFrameworkSet/repository"
+                    credentials {
+                        username = "$System.env.REPOSITORY_USER"
+                        password = "$System.env.REPOSITORY_PASSWORD"
+                    }
+                }
+            }
+        }
+    }
+}
+
+dependencies {
+    api project(":Components:Strata.Stream.Core")
+    api project(":Components:Strata.Stream.Basic")
+    api "org.apache.kafka:kafka-streams:$kafka_version"
+    api "org.apache.kafka:kafka-clients:$kafka_version"
+    api "io.confluent:kafka-streams-avro-serde:$confluent_kafka_streams_version"
+}

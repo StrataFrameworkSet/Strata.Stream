@@ -1,0 +1,36 @@
+plugins {
+    id 'java-library'
+    id 'java-test-fixtures'
+}
+
+sourceSets {
+    main.java.srcDirs = ['src/unused']
+    main.resources.srcDirs = ['src/unused']
+    test.java.srcDirs = ['src/test/java']
+    test.resources.srcDirs = ['src/test/resources']
+    testFixtures.java.srcDirs = ['src/testFixtures/java']
+    testFixtures.resources.srcDirs = ['src/testFixtures/resources']
+}
+
+group 'strata.stream'
+version '1.0-SNAPSHOT'
+
+dependencies {
+    api project(':Components:Strata.Stream.Core')
+    api project(':Components:Strata.Stream.Basic')
+    testImplementation "org.junit.jupiter:junit-jupiter-params:$junit_jupiter_version"
+    testImplementation "org.junit.jupiter:junit-jupiter-api:$junit_jupiter_version"
+
+    testFixturesApi project(':Components:Strata.Stream.Core')
+    testFixturesImplementation "org.junit.jupiter:junit-jupiter-params:$junit_jupiter_version"
+    testFixturesImplementation "org.junit.jupiter:junit-jupiter-api:$junit_jupiter_version"
+    testFixturesApi 'net.openhft:chronicle-map:3.27ea1'
+
+    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$junit_jupiter_version"
+}
+
+test {
+    useJUnitPlatform {
+        includeTags("CommitStage")
+    }
+}

@@ -1,0 +1,22 @@
+//////////////////////////////////////////////////////////////////////////////
+// AbstractBoundedStreamSink.java
+//////////////////////////////////////////////////////////////////////////////
+
+package strata.stream.core.bounded;
+
+public abstract
+class AbstractBoundedStreamSink<T>
+    implements IBoundedStreamSink<T>
+{
+    @Override
+    public void
+    accept(IBoundedStream<T> stream)
+    {
+        stream.forEach(e -> process(e));
+    }
+
+    protected abstract void
+    process(T element);
+}
+
+//////////////////////////////////////////////////////////////////////////////
