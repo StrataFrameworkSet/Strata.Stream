@@ -11,11 +11,15 @@ import org.apache.kafka.streams.StreamsConfig;
 import org.apache.kafka.streams.TestInputTopic;
 import org.apache.kafka.streams.Topology;
 import org.apache.kafka.streams.TopologyTestDriver;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import strata.stream.core.shared.IStreamExecution;
 import strata.stream.core.unbounded.IExecutionDriver;
 
+import java.time.Duration;
 import java.util.List;
 import java.util.Properties;
+import java.util.concurrent.Executors;
 
 @SuppressWarnings("unchecked")
 public
@@ -24,11 +28,13 @@ class KafkaTestExecutionDriver<T>
 {
     private final Serializer<T> serializer;
     private final List<T> sequence;
+    private final Logger  logger;
 
     public KafkaTestExecutionDriver(Serializer<T> serializer,T... elements)
     {
         this.serializer = serializer;
         this.sequence = List.of(elements);
+        this.logger = LogManager.getLogger(getClass());
     }
 
     @Override
@@ -37,6 +43,7 @@ class KafkaTestExecutionDriver<T>
     {
         if (input instanceof Topology topology)
         {
+            logger.info("Starting Kafka test driver with topology: {}",topology);
             TopologyTestDriver driver =
                 new TopologyTestDriver(topology,getDefaultProperties());
             TestInputTopic<String,T> topic =
@@ -45,7 +52,12 @@ class KafkaTestExecutionDriver<T>
                     new StringSerializer(),
                     serializer);
 
+            logger.info("Publishing {} elements to test topic...",sequence.size());
             sequence.forEach(element -> topic.pipeInput("key",element));
+
+            logger.info("Advancing clock by 10 seconds...");
+            driver.advanceWallClockTime(Duration.ofSeconds(10));
+
             return new KafkaStreamExecution(topology);
         }
 
@@ -71,6 +83,24 @@ class KafkaTestExecutionDriver<T>
         props.put(StreamsConfig.TOPOLOGY_OPTIMIZATION_CONFIG,StreamsConfig.OPTIMIZE);
 
         return props;
+    }
+
+    private void
+    advanceClock(TopologyTestDriver driver,int secondTicks)
+    {
+        for (int i = 0; i < secondTicks; i++)
+        {
+            logger.info("Advancing clock by one second...");
+            driver.advanceWallClockTime(Duration.ofSeconds(1));
+            try
+            {
+                Thread.sleep(100);
+            }
+            catch (InterruptedException e)
+            {
+                throw new RuntimeException(e);
+            }
+        }
     }
 }
 

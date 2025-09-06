@@ -1,0 +1,20 @@
+/// ///////////////////////////////////////////////////////////////////////////
+// SimpleBoundedStreamSerializer.java
+//////////////////////////////////////////////////////////////////////////////
+
+package strata.stream.kafka.unbounded;
+
+import strata.stream.core.bounded.IBoundedStream;
+
+public
+class SimpleBoundedStreamSerializer<T>
+    implements IBoundedStreamSerializer<T>
+{
+    @Override
+    public byte[] serialize(String topic,IBoundedStream<T> data)
+    {
+        return new byte[0];
+    }
+}
+
+//////////////////////////////////////////////////////////////////////////////

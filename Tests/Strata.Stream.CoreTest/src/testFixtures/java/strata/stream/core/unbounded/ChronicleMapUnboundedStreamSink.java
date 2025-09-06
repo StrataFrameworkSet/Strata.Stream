@@ -47,7 +47,7 @@ class ChronicleMapUnboundedStreamSink<K,T>
                 .of(keyType,valueType)
                 .name(mapName)
                 .averageValueSize(averageValueSize)
-                .entries(10)
+                .entries(50)
                 .createPersistedTo(new File(filePath));
         logger = LogManager.getLogger(this.getClass());
     }

@@ -30,7 +30,7 @@ class BoundedStreamMapper<K,T>
     public KeyValue<K,IBoundedStream<T>>
     apply(Windowed<K> key,List<T> value)
     {
-        logger.debug("apply({},{})", key, value);
+        logger.debug("apply({},{})", key.key(), value);
         return KeyValue.pair(key.key(),BasicBoundedStream.of(value));
     }
 }

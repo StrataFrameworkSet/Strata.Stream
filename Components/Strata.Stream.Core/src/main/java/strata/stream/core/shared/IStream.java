@@ -6,7 +6,6 @@ package strata.stream.core.shared;
 
 public
 interface IStream<T>
-    extends IStreamable
 {
     IStream<T>
     filter(IPredicate<? super T> predicate);

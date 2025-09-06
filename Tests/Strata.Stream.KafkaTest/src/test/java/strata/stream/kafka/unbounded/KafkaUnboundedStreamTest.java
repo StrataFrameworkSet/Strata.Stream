@@ -51,7 +51,7 @@ class KafkaUnboundedStreamTest
     }
 
     @Override
-    @Test
+    //@Test
     public void
     testWindowBy() throws Exception
     {

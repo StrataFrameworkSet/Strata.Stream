@@ -8,6 +8,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import strata.stream.basic.bounded.BasicBoundedStream;
+import strata.stream.basic.unbounded.MapUnboundedStreamSink;
 import strata.stream.core.bounded.IBoundedStream;
 import strata.stream.core.shared.TimeAmount;
 
@@ -99,7 +100,7 @@ class AbstractUnboundedStreamTest
     testWindowBy() throws Exception
     {
         ITimeWindowedUnboundedStream<String> windowed =
-            subject.windowBy(TimeAmount.of(100,TimeUnit.MILLISECONDS));
+            subject.windowBy(TimeAmount.of(5,TimeUnit.SECONDS));
 
         await(
             windowed

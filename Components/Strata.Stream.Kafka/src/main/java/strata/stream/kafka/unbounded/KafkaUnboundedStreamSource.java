@@ -30,8 +30,8 @@ class KafkaUnboundedStreamSource<K,T>
                         .stream(
                             topic,
                             Consumed.with(
-                                Serdes.serdeFrom(keyType),
-                                Serdes.serdeFrom(valueType))),
+                                ReflectiveSerde.of(keyType),
+                                ReflectiveSerde.of(valueType))),
                     builder));
 
     }
