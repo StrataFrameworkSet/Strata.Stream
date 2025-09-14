@@ -1,0 +1,15 @@
+/// ///////////////////////////////////////////////////////////////////////////
+// IInitialContextToStringContextEnricherMapper.java
+//////////////////////////////////////////////////////////////////////////////
+
+package strata.stream.pipeline.enrichment;
+
+import strata.stream.pipeline.context.InitialContext;
+import strata.stream.pipeline.context.ToStringContext;
+
+public
+interface IInitialContextToStringContextEnricherMapper
+    extends IEnricherMapper<Long,String,InitialContext,ToStringContext>
+{}
+
+//////////////////////////////////////////////////////////////////////////////

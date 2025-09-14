@@ -52,7 +52,7 @@ class FlinkUnboundedStreamTest
                 e -> Long.valueOf(e.hashCode()));
 
         environment
-            .fromElements("aaaa","bbbb","cccc","foo")
+            .fromData("aaaa","bbbb","cccc","foo")
             .filter(e -> !e.equals("foo"))
             .map(e -> e.toUpperCase())
             .sinkTo(new SinkAdapter<>(sink));

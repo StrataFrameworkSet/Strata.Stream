@@ -1,20 +1,16 @@
 /// ///////////////////////////////////////////////////////////////////////////
-// IController.java
+// StepStatus.java
 //////////////////////////////////////////////////////////////////////////////
 
-package strata.stream.basic.unbounded;
+package strata.stream.pipeline.context;
 
 public
-interface IController
+enum StepStatus
 {
-    void
-    start();
-
-    void
-    stop();
-
-    boolean
-    isRunning();
+    IN_PROGRESS,
+    COMPLETED,
+    COMPLETED_WITH_EXCEPTION,
+    FAILED
 }
 
 //////////////////////////////////////////////////////////////////////////////

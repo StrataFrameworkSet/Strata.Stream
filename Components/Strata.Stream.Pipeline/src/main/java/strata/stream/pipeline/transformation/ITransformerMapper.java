@@ -1,0 +1,19 @@
+/// ///////////////////////////////////////////////////////////////////////////
+// ITransformerMapper.java
+//////////////////////////////////////////////////////////////////////////////
+
+package strata.stream.pipeline.transformation;
+
+import strata.stream.pipeline.context.IPipelineContext;
+
+import java.util.function.Function;
+
+public
+interface ITransformerMapper<
+    I,
+    O,
+    CI extends IPipelineContext<I>,
+    CO extends IPipelineContext<O>>
+    extends Function<CI,CO> {}
+
+//////////////////////////////////////////////////////////////////////////////

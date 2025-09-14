@@ -35,9 +35,11 @@ include 'Components:Strata.Stream.Core'
 include 'Components:Strata.Stream.Basic'
 include 'Components:Strata.Stream.Flink'
 include 'Components:Strata.Stream.Kafka'
+include 'Components:Strata.Stream.Pipeline'
 
 // Tests
 include 'Tests:Strata.Stream.CoreTest'
 include 'Tests:Strata.Stream.BasicTest'
 include 'Tests:Strata.Stream.FlinkTest'
 include 'Tests:Strata.Stream.KafkaTest'
+include 'Tests:Strata.Stream.PipelineTest'

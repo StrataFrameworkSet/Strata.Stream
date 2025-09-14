@@ -31,7 +31,7 @@ class FromElementsUnboundedStreamSource<T>
         stream =
             Optional.of(
                 new FlinkUnboundedStream<>(
-                    environment.fromElements(elements)));
+                    environment.fromData(elements)));
     }
 
     @Override

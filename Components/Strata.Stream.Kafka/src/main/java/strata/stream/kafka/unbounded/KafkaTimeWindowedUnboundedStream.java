@@ -4,15 +4,9 @@
 
 package strata.stream.kafka.unbounded;
 
-import io.confluent.kafka.streams.serdes.avro.PrimitiveAvroSerde;
-import io.confluent.kafka.streams.serdes.avro.ReflectionAvroSerde;
-import io.confluent.kafka.streams.serdes.avro.SpecificAvroSerde;
-import org.apache.kafka.common.serialization.Serdes;
-import org.apache.kafka.common.serialization.Serdes.ListSerde;
 import org.apache.kafka.streams.StreamsBuilder;
 import org.apache.kafka.streams.kstream.*;
 import org.apache.kafka.streams.kstream.Suppressed.BufferConfig;
-import strata.foundation.core.reflect.TypeLiteral;
 import strata.stream.core.bounded.IBoundedStream;
 import strata.stream.core.shared.TimeAmount;
 import strata.stream.core.unbounded.ITimeWindowedUnboundedStream;
