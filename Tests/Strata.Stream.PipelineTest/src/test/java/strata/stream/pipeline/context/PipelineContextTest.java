@@ -119,6 +119,7 @@ class PipelineContextTest
             IllegalStateException.class,
             () ->
                 initial
+                    .startStep(".NextStep")
                     .completeStepWith(new SyntacticValidationFailedException())
                     .getStatus());
         assertThrows(
@@ -155,12 +156,14 @@ class PipelineContextTest
             IllegalStateException.class,
             () ->
                 initial
+                    .startStep(".NextStep")
                     .completeStep()
                     .getStatus());
         assertThrows(
             IllegalStateException.class,
             () ->
                 initial
+                    .startStep(".NextStep")
                     .failStepWith(new SyntacticValidationFailedException())
                     .getStatus());
     }
@@ -191,12 +194,14 @@ class PipelineContextTest
             IllegalStateException.class,
             () ->
                 initial
+                    .startStep(".NextStep")
                     .completeStep()
                     .getStatus());
         assertThrows(
             IllegalStateException.class,
             () ->
                 initial
+                    .startStep(".NextStep")
                     .completeStepWith(new SyntacticValidationFailedException())
                     .getStatus());
     }

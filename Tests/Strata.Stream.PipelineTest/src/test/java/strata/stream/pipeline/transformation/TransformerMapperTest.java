@@ -35,7 +35,11 @@ class TransformerMapperTest
     public void
     testApply()
     {
-        InitialContext  initial  = InitialContext.of(1L);
+        InitialContext  initial  =
+            InitialContext
+                .of(1L)
+                .startStep(".A")
+                .completeStep();
         ToStringContext toString = transformerA.apply(initial);
         ToUpperContext  toUpper  = transformerB.apply(toString);
 
