@@ -95,11 +95,16 @@ class AbstractPipelineContext<T>
                 break;
 
             case COMPLETED_WITH_EXCEPTION:
+                logger.error(
+                    "Step {} already completed with exception.",
+                    current.getName());
+                throw new IllegalStateException("Step already completed with exception.");
+
             case FAILED:
                 logger.error(
-                    "Step {} already completed.",
+                    "Step {} already failed.",
                     current.getName());
-                throw new IllegalStateException("Step already completed.");
+                throw new IllegalStateException("Step already failed.");
         }
 
         return this;
@@ -134,13 +139,20 @@ class AbstractPipelineContext<T>
                 break;
 
             case COMPLETED:
-            case FAILED:
                 logger.error(
-                    "Step {} already completed with exception.",
+                    "Step {} already completed.",
                     current.getName());
                 throw
                     new IllegalStateException(
-                        "Step already completed with exception.");
+                        "Step already completed.");
+
+            case FAILED:
+                logger.error(
+                    "Step {} already failed.",
+                    current.getName());
+                throw
+                    new IllegalStateException(
+                        "Step already failed.");
         }
 
         return this;
@@ -175,9 +187,16 @@ class AbstractPipelineContext<T>
                 break;
 
             case COMPLETED:
+                logger.error(
+                    "Step {} already completed.",
+                    current.getName());
+                throw new IllegalStateException("Step already completed.");
+
             case COMPLETED_WITH_EXCEPTION:
-                logger.error("Step {} already failed.",current.getName());
-                throw new IllegalStateException("Step already failed.");
+                logger.error(
+                    "Step {} already completed with exception.",
+                    current.getName());
+                throw new IllegalStateException("Step already completed with exception.");
         }
 
         return this;
