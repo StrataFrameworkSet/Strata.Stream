@@ -13,8 +13,7 @@ import strata.stream.pipeline.validation.SyntacticValidationFailedException;
 import java.util.List;
 import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 
 @Tag("CommitStage")
 public
@@ -32,53 +31,66 @@ class PipelineContextTest
         toString =
             new ToStringContext(
                 "Seven",
-                List.of(StepResult.of("Initial",StepStatus.COMPLETED)));
+                List.of(PipelineStep.of(initial,"Initial",StepStatus.COMPLETED)));
         toUpper =
             new ToUpperContext(
                 "SEVEN",
                 List.of(
-                    StepResult.of("Initial",StepStatus.COMPLETED),
-                    StepResult.of("ToString",StepStatus.COMPLETED)));
+                    PipelineStep.of(toString,"ToString",StepStatus.COMPLETED),
+                    PipelineStep.of(toString,"ToString",StepStatus.COMPLETED)));
     }
 
     @Test
     public void
     testConstructors()
     {
-        assertEquals("Initial",initial.getStep());
+        assertTrue(initial.getCurrentStep().isEmpty());
+        assertTrue(initial.getCurrentStep().isEmpty());
         assertEquals(7L,initial.getValue());
-        assertEquals(StepStatus.IN_PROGRESS,initial.getStatus());
-        assertEquals(1,initial.getAccumulatedResults().size());
+        assertEquals(0,initial.getAccumulatedSteps().size());
+        initial.startStep(".NextStep");
+        assertEquals(1,initial.getAccumulatedSteps().size());
 
-        assertEquals("ToString",toString.getStep());
+        assertTrue(toString.getCurrentStep().isEmpty());
         assertEquals("Seven",toString.getValue());
-        assertEquals(StepStatus.IN_PROGRESS,toString.getStatus());
-        assertEquals(2,toString.getAccumulatedResults().size());
+        assertEquals(1,toString.getAccumulatedSteps().size());
+        toString.startStep(".NextStep");
+        assertEquals(2,toString.getAccumulatedSteps().size());
 
-        assertEquals("ToUpper",toUpper.getStep());
+
+        assertTrue(toUpper.getCurrentStep().isEmpty());
         assertEquals("SEVEN",toUpper.getValue());
-        assertEquals(StepStatus.IN_PROGRESS,toUpper.getStatus());
-        assertEquals(3,toUpper.getAccumulatedResults().size());
+        assertEquals(2,toUpper.getAccumulatedSteps().size());
 
         toString =
             new ToStringContext(
                 new SyntacticValidationFailedException(),
-                List.of(StepResult.of("Initial",StepStatus.COMPLETED)));
-        assertEquals("ToString",toString.getStep());
-        assertEquals(StepStatus.FAILED,toString.getStatus());
+                List.of(PipelineStep.of(initial,"Initial",StepStatus.COMPLETED)));
+        assertTrue(toString.getCurrentStep().isPresent());
+        assertEquals(
+            StepStatus.FAILED,
+            toString
+                .getCurrentStep()
+                .orElseThrow()
+                .getStatus());
 
         toUpper =
             new ToUpperContext(
                 "SEVEN",
                 List.of(
-                    StepResult.of("Initial",StepStatus.COMPLETED),
-                    StepResult.of(
+                    PipelineStep.of(initial,"Initial",StepStatus.COMPLETED),
+                    PipelineStep.of(
+                        toString,
                         "ToString",
-                        StepStatus.FAILED,
                         new SyntacticValidationFailedException())));
 
-        assertEquals("ToUpper",toUpper.getStep());
-        assertEquals(StepStatus.FAILED,toUpper.getStatus());
+        assertTrue(toUpper.getCurrentStep().isEmpty());
+        assertEquals(
+            StepStatus.FAILED,
+            toUpper
+                .getAccumulatedSteps()
+                .getLast()
+                .getStatus());
     }
 
     @Test
@@ -89,7 +101,9 @@ class PipelineContextTest
             "ToUpperNextStep",
             toUpper
                 .startStep("NextStep")
-                .getStep());
+                .getCurrentStep()
+                .orElseThrow()
+                .getName());
     }
 
 
@@ -101,19 +115,29 @@ class PipelineContextTest
             "Initial.NextStep",
             initial
                 .startStep(".NextStep")
-                .getStep());
+                .getCurrentStep()
+                .orElseThrow()
+                .getName());
         assertEquals(
-            "Initial",
+            "Initial.NextStep",
             initial
                 .completeStep()
-                .getStep());
-        assertEquals(
-            StepStatus.COMPLETED,
-            initial.getStatus());
+                .getAccumulatedSteps()
+                .getLast()
+                .getName());
         assertEquals(
             StepStatus.COMPLETED,
             initial
+                .getAccumulatedSteps()
+                .getLast()
+                .getStatus());
+        assertEquals(
+            StepStatus.COMPLETED,
+            initial
+                .startStep(".NextStep")
                 .completeStep()
+                .getAccumulatedSteps()
+                .getLast()
                 .getStatus());
         assertThrows(
             IllegalStateException.class,
@@ -121,13 +145,12 @@ class PipelineContextTest
                 initial
                     .startStep(".NextStep")
                     .completeStepWith(new SyntacticValidationFailedException())
-                    .getStatus());
+                    .completeStep());
         assertThrows(
             IllegalStateException.class,
             () ->
                 initial
-                    .failStepWith(new SyntacticValidationFailedException())
-                    .getStatus());
+                    .failStepWith(new SyntacticValidationFailedException()));
     }
 
     @Test
@@ -138,19 +161,29 @@ class PipelineContextTest
             "Initial.NextStep",
             initial
                 .startStep(".NextStep")
-                .getStep());
+                .getCurrentStep()
+                .orElseThrow()
+                .getName());
         assertEquals(
-            "Initial",
+            "Initial.NextStep",
             initial
                 .completeStepWith(new SyntacticValidationFailedException())
-                .getStep());
-        assertEquals(
-            StepStatus.COMPLETED_WITH_EXCEPTION,
-            initial.getStatus());
+                .getAccumulatedSteps()
+                .getLast()
+                .getName());
         assertEquals(
             StepStatus.COMPLETED_WITH_EXCEPTION,
             initial
+                .getAccumulatedSteps()
+                .getLast()
+                .getStatus());
+        assertEquals(
+            StepStatus.COMPLETED_WITH_EXCEPTION,
+            initial
+                .startStep(".NextStep")
                 .completeStepWith(new SyntacticValidationFailedException())
+                .getAccumulatedSteps()
+                .getLast()
                 .getStatus());
         assertThrows(
             IllegalStateException.class,
@@ -158,14 +191,14 @@ class PipelineContextTest
                 initial
                     .startStep(".NextStep")
                     .completeStep()
-                    .getStatus());
+                    .failStepWith(new SyntacticValidationFailedException()));
         assertThrows(
             IllegalStateException.class,
             () ->
                 initial
                     .startStep(".NextStep")
                     .failStepWith(new SyntacticValidationFailedException())
-                    .getStatus());
+                    .completeStepWith(new SyntacticValidationFailedException()));
     }
 
     @Test
@@ -176,26 +209,39 @@ class PipelineContextTest
             "Initial.NextStep",
             initial
                 .startStep(".NextStep")
-                .getStep());
+                .getCurrentStep()
+                .orElseThrow()
+                .getName());
         assertEquals(
-            "Initial",
+            "Initial.NextStep",
             initial
                 .failStepWith(new SyntacticValidationFailedException())
-                .getStep());
-        assertEquals(
-            StepStatus.FAILED,
-            initial.getStatus());
+                .getAccumulatedSteps()
+                .getLast()
+                .getName());
         assertEquals(
             StepStatus.FAILED,
             initial
+                .getAccumulatedSteps()
+                .getLast()
+                .getStatus());
+        assertEquals(
+            StepStatus.FAILED,
+            initial
+                .startStep(".NextStep")
                 .failStepWith(new SyntacticValidationFailedException())
+                .getAccumulatedSteps()
+                .getLast()
                 .getStatus());
         assertThrows(
             IllegalStateException.class,
             () ->
                 initial
                     .startStep(".NextStep")
+                    .startStep(".AnotherStep")
                     .completeStep()
+                    .getAccumulatedSteps()
+                    .getLast()
                     .getStatus());
         assertThrows(
             IllegalStateException.class,
@@ -203,6 +249,9 @@ class PipelineContextTest
                 initial
                     .startStep(".NextStep")
                     .completeStepWith(new SyntacticValidationFailedException())
+                    .completeStep()
+                    .getAccumulatedSteps()
+                    .getLast()
                     .getStatus());
     }
 
@@ -228,8 +277,8 @@ class PipelineContextTest
             new ToUpperContext(
                 "Seven",
                 List.of(
-                    StepResult.of("Initial",StepStatus.COMPLETED),
-                    StepResult.of("ToString",StepStatus.COMPLETED)));
+                    PipelineStep.of(initial,"Initial",StepStatus.COMPLETED),
+                    PipelineStep.of(toString,"ToString",StepStatus.COMPLETED)));
         assertEquals("Seven", toUpper.getValue());
         assertEquals(
             Conditional.TRUE,
@@ -240,8 +289,8 @@ class PipelineContextTest
             new ToUpperContext(
                 "Seven",
                 List.of(
-                    StepResult.of("Initial",StepStatus.COMPLETED),
-                    StepResult.of("ToString",StepStatus.COMPLETED)));
+                    PipelineStep.of(initial,"Initial",StepStatus.COMPLETED),
+                    PipelineStep.of(toString,"ToString",StepStatus.COMPLETED)));
         assertEquals("Seven", toUpper.getValue());
         assertEquals(
             Conditional.FALSE,

@@ -15,41 +15,41 @@ class ToStringContext
     implements IPipelineContext<String>
 {
     public
-    ToStringContext(PipelineException exception,List<StepResult> previousResults)
+    ToStringContext(PipelineException exception,List<PipelineStep> previousSteps)
     {
-        super("ToString",exception,previousResults);
+        super("ToString",exception,previousSteps);
     }
 
     public
-    ToStringContext(String value,List<StepResult> previousResults)
+    ToStringContext(String value,List<PipelineStep> previousSteps)
     {
-        super("ToString",value,previousResults);
+        super("ToString",value,previousSteps);
     }
 
     @Override
     public ToStringContext
-    startStep(String step)
+    startStep(String step) throws IllegalStateException
     {
         return (ToStringContext)super.startStep(step);
     }
 
     @Override
     public ToStringContext
-    completeStep()
+    completeStep() throws IllegalStateException
     {
         return (ToStringContext)super.completeStep();
     }
 
     @Override
     public ToStringContext
-    completeStepWith(PipelineException exception)
+    completeStepWith(PipelineException exception) throws IllegalStateException
     {
         return (ToStringContext)super.completeStepWith(exception);
     }
 
     @Override
     public ToStringContext
-    failStepWith(PipelineException exception)
+    failStepWith(PipelineException exception) throws IllegalStateException
     {
         return (ToStringContext)super.failStepWith(exception);
     }

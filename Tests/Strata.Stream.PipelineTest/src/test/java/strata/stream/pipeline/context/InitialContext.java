@@ -19,28 +19,28 @@ class InitialContext
 
     @Override
     public InitialContext
-    startStep(String step)
+    startStep(String step) throws IllegalStateException
     {
         return (InitialContext)super.startStep(step);
     }
 
     @Override
     public InitialContext
-    completeStep()
+    completeStep() throws IllegalStateException
     {
         return (InitialContext)super.completeStep();
     }
 
     @Override
     public InitialContext
-    completeStepWith(PipelineException exception)
+    completeStepWith(PipelineException exception) throws IllegalStateException
     {
         return (InitialContext)super.completeStepWith(exception);
     }
 
     @Override
     public InitialContext
-    failStepWith(PipelineException exception)
+    failStepWith(PipelineException exception) throws IllegalStateException
     {
         return (InitialContext)super.failStepWith(exception);
     }

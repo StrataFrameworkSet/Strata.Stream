@@ -8,22 +8,22 @@ import strata.foundation.core.utility.Conditional;
 import strata.stream.pipeline.shared.PipelineException;
 
 import java.util.List;
-import java.util.NoSuchElementException;
+import java.util.Optional;
 
 public
 interface IPipelineContext<T>
 {
     IPipelineContext<T>
-    startStep(String step);
+    startStep(String step) throws IllegalStateException;
 
     IPipelineContext<T>
-    completeStep();
+    completeStep() throws IllegalStateException;
 
     IPipelineContext<T>
-    completeStepWith(PipelineException exception);
+    completeStepWith(PipelineException exception) throws IllegalStateException;
 
     IPipelineContext<T>
-    failStepWith(PipelineException exception);
+    failStepWith(PipelineException exception) throws IllegalStateException;
 
     Conditional
     recover(PipelineException exception);
@@ -31,14 +31,11 @@ interface IPipelineContext<T>
     T
     getValue() throws NullPointerException;
 
-    String
-    getStep();
+    Optional<PipelineStep>
+    getCurrentStep();
 
-    StepStatus
-    getStatus();
-
-    List<StepResult>
-    getAccumulatedResults();
+    List<PipelineStep>
+    getAccumulatedSteps();
 
     boolean
     isRecoverable(PipelineException exception);

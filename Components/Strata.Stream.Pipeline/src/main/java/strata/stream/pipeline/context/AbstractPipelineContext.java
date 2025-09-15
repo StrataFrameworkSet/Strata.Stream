@@ -18,12 +18,11 @@ public abstract
 class AbstractPipelineContext<T>
     implements IPipelineContext<T>
 {
-    private String                 stepPrefix;
-    private String                 step;
-    private T                      value;
-    private Optional<StepResult>   result;
-    private final List<StepResult> previousResults;
-    private final Logger           logger;
+    private String                   stepPrefix;
+    private T                        value;
+    private final List<PipelineStep> previousSteps;
+    private Optional<PipelineStep>   currentStep;
+    private final Logger             logger;
 
     @SuppressWarnings("unchecked")
     protected
@@ -40,141 +39,67 @@ class AbstractPipelineContext<T>
 
     protected
     AbstractPipelineContext(
-        String           stepPrefix,
-        T                value,
-        List<StepResult> previousResults)
+        String             stepPrefix,
+        T                  value,
+        List<PipelineStep> previousSteps)
     {
         this.stepPrefix = stepPrefix;
-        this.step = "";
         this.value = value;
-        this.result = Optional.empty();
-        this.previousResults = new ArrayList<>(previousResults);
+        this.previousSteps = new ArrayList<>(previousSteps);
+        this.currentStep = Optional.empty();
         this.logger = LogManager.getLogger(getClass());
     }
 
     protected
     AbstractPipelineContext(
-        String            stepPrefix,
-        PipelineException exception,
-        List<StepResult>  previousResults)
+        String             stepPrefix,
+        PipelineException  exception,
+        List<PipelineStep> previousSteps)
     {
         this.stepPrefix = stepPrefix;
-        this.step = "";
         this.value = null;
-        this.result = Optional.of(StepResult.of(getStep(),StepStatus.FAILED,exception));
-        this.previousResults = new ArrayList<>(previousResults);
+        this.previousSteps = new ArrayList<>(previousSteps);
+        this.currentStep = Optional.of(PipelineStep.of(this,stepPrefix,exception));
         this.logger = LogManager.getLogger(getClass());
     }
 
     @Override
     public IPipelineContext<T>
-    startStep(String step)
+    startStep(String step) throws IllegalStateException
     {
-        this.step = Objects.toString(step,"");
-        logger.info("Starting step {}.",getStep());
+        currentStep.ifPresent(current -> throwCurrentStepExistsException(current));
+        currentStep = Optional.of(new PipelineStep(this,stepPrefix + step));
+        logger.info("Starting step {}.",getCurrentStep());
         return this;
     }
 
     @Override
     public IPipelineContext<T>
-    completeStep()
+    completeStep() throws IllegalStateException
     {
-        if (hasNonDuplicatedSteps())
+        PipelineStep current =
+            currentStep.orElseThrow(
+                () -> new IllegalStateException("No current step."));
+
+        switch (current.getStatus())
         {
-            logger.info("Completed step {}.",getStep());
-            result.ifPresent(current -> previousResults.add(current));
-            result = Optional.of(StepResult.of(getStep(),StepStatus.COMPLETED));
-            notifyCompleted(getStep());
-            step = "";
-        }
-        else
-        {
-            switch (getStatus())
-            {
-                case IN_PROGRESS:
-                    logger.info("Completed step {}.",getStep());
-                    result = Optional.of(StepResult.of(getStep(),StepStatus.COMPLETED));
-                    notifyCompleted(getStep());
-                    step = "";
-                    break;
+            case IN_PROGRESS:
+                logger.info("Completed step {}.",current.getName());
+                complete(current);
+                notifyCompleted(current);
+                currentStep = Optional.empty();
+                break;
 
-                case COMPLETED:
-                    logger.warn("Step {} already completed.",getStep());
-                    break;
+            case COMPLETED:
+                logger.warn("Step {} already completed.",current.getName());
+                break;
 
-                case COMPLETED_WITH_EXCEPTION:
-                    logger.error("Step {} already completed with exception.",getStep());
-                    throw new IllegalStateException("Step already completed with exception.");
-
-                case FAILED:
-                    logger.error("Step {} already failed.",getStep());
-                    throw new IllegalStateException("Step already failed");
-
-                default:
-                    logger.error("Step {} has unknown status.",getStep());
-                    throw new IllegalStateException("Step in invalid state");
-            }
-        }
-        return this;
-    }
-
-    @Override
-    public IPipelineContext<T>
-    completeStepWith(PipelineException exception)
-    {
-        if (hasNonDuplicatedSteps())
-        {
-            logger.info(
-                "Completed step {} with exception {}.",
-                getStep(),
-                Objects.toString(
-                    exception.getMessage(),
-                    exception.getClass().getSimpleName()));
-            result.ifPresent(current -> previousResults.add(current));
-            result = Optional.of(
-                StepResult.of(
-                    getStep(),
-                    StepStatus.COMPLETED_WITH_EXCEPTION,
-                    exception));
-            notifyCompleted(getStep(),exception);
-            step = "";
-        }
-        else
-        {
-            switch (getStatus())
-            {
-                case IN_PROGRESS:
-                    logger.info(
-                        "Completed step {} with exception {}.",
-                        getStep(),
-                        Objects.toString(
-                            exception.getMessage(),
-                            exception.getClass().getSimpleName()));
-                    result = Optional.of(
-                        StepResult.of(
-                            getStep(),
-                            StepStatus.COMPLETED_WITH_EXCEPTION,
-                            exception));
-                    notifyCompleted(getStep(),exception);
-                    step = "";
-                    break;
-
-                case COMPLETED_WITH_EXCEPTION:
-                    logger.warn("Step {} already completed with exception.",getStep());
-                    break;
-
-                case COMPLETED:
-                    logger.error("Step {} already completed.",getStep());
-                    throw new IllegalStateException("Step already completed.");
-
-                case FAILED:
-                    logger.error("Step {} already failed.",getStep());
-                    throw new IllegalStateException("Step already failed");
-
-                default:
-                    logger.error("Step {} has unknown status.",getStep());
-                    throw new IllegalStateException("Step in invalid state");
-            }
+            case COMPLETED_WITH_EXCEPTION:
+            case FAILED:
+                logger.error(
+                    "Step {} already completed.",
+                    current.getName());
+                throw new IllegalStateException("Step already completed.");
         }
 
         return this;
@@ -182,63 +107,87 @@ class AbstractPipelineContext<T>
 
     @Override
     public IPipelineContext<T>
-    failStepWith(PipelineException exception)
+    completeStepWith(PipelineException exception) throws IllegalStateException
     {
-        if (hasNonDuplicatedSteps())
+        PipelineStep current =
+            currentStep.orElseThrow(
+                () -> new IllegalStateException("No current step."));
+
+        switch (current.getStatus())
         {
-            logger.error(
-                "Step {} failed with exception {}.",
-                getStep(),
-                Objects.toString(
-                    exception.getMessage(),
-                    exception.getClass().getSimpleName()));
-            result.ifPresent(current -> previousResults.add(current));
-            result = Optional.of(StepResult.of(getStep(),StepStatus.FAILED,exception));
-            notifyFailed(getStep(),exception);
-            step = "";
-        }
-        else
-        {
-            switch (getStatus())
-            {
-                case IN_PROGRESS:
-                    logger.error(
-                        "Step {} failed with exception {}.",
-                        getStep(),
-                        Objects.toString(
-                            exception.getMessage(),
-                            exception.getClass().getSimpleName()));
-                    result = Optional.of(StepResult.of(getStep(),StepStatus.FAILED,exception));
-                    notifyFailed(getStep(),exception);
-                    step = "";
-                    break;
+            case IN_PROGRESS:
+                logger.info(
+                    "Completed step {} with exception {}.",
+                    current.getName(),
+                    Objects.toString(
+                        exception.getMessage(),
+                        exception.getClass().getSimpleName()));
+                completeWith(current,exception);
+                notifyCompleted(current);
+                currentStep = Optional.empty();
+                break;
 
-                case FAILED:
-                    logger.warn("Step {} already failed with exception.",getStep());
-                    break;
+            case COMPLETED_WITH_EXCEPTION:
+                logger.warn(
+                    "Step {} already completed with exception.",
+                    current.getName());
+                break;
 
-                case COMPLETED:
-                    logger.error("Step {} already completed.",getStep());
-                    throw new IllegalStateException("Step already completed.");
-
-                case COMPLETED_WITH_EXCEPTION:
-                    logger.error("Step {} already completed with exception.",getStep());
-                    throw new IllegalStateException("Step already completed with exception");
-
-                default:
-                    logger.error("Step {} has unknown status",getStep());
-                    throw new IllegalStateException("Step in invalid state");
-            }
+            case COMPLETED:
+            case FAILED:
+                logger.error(
+                    "Step {} already completed with exception.",
+                    current.getName());
+                throw
+                    new IllegalStateException(
+                        "Step already completed with exception.");
         }
 
         return this;
     }
 
     @Override
-    public String
-    getStep()
+    public IPipelineContext<T>
+    failStepWith(PipelineException exception) throws IllegalStateException
     {
-        return stepPrefix + step;
+        PipelineStep current =
+            currentStep.orElseThrow(
+                () -> new IllegalStateException("No current step."));
+
+        switch (current.getStatus())
+        {
+            case IN_PROGRESS:
+                logger.error(
+                    "Step {} failed with exception {}.",
+                    getCurrentStep(),
+                    Objects.toString(
+                        exception.getMessage(),
+                        exception.getClass().getSimpleName()));
+                failWith(current,exception);
+                notifyFailed(current);
+                currentStep = Optional.empty();
+                break;
+
+            case FAILED:
+                logger.warn(
+                    "Step {} already failed with exception.",
+                    current.getName());
+                break;
+
+            case COMPLETED:
+            case COMPLETED_WITH_EXCEPTION:
+                logger.error("Step {} already failed.",current.getName());
+                throw new IllegalStateException("Step already failed.");
+        }
+
+        return this;
+    }
+
+    @Override
+    public Optional<PipelineStep>
+    getCurrentStep()
+    {
+        return currentStep;
     }
 
     @Override
@@ -251,33 +200,13 @@ class AbstractPipelineContext<T>
     }
 
     @Override
-    public StepStatus
-    getStatus()
+    public List<PipelineStep>
+    getAccumulatedSteps()
     {
         return
-            result
-                .map(StepResult::getStatus)
-                .orElseGet(
-                    () ->
-                        previousResults
-                            .stream()
-                            .filter(previous -> isFailed(previous))
-                            .findFirst()
-                            .map(StepResult::getStatus)
-                            .orElse(StepStatus.IN_PROGRESS));
-    }
-
-    @Override
-    public List<StepResult>
-    getAccumulatedResults()
-    {
-        return
-            result
-                .map(current -> accumulateResults(current))
-                .orElseGet(
-                    () ->
-                        accumulateResults(
-                            StepResult.of(getStep(),StepStatus.IN_PROGRESS)));
+            currentStep
+                .map(current -> accumulateSteps(current))
+                .orElseGet(() -> previousSteps);
     }
 
     @Override
@@ -312,71 +241,138 @@ class AbstractPipelineContext<T>
     }
 
     protected void
-    notifyCompleted(String step)
+    notifyCompleted(PipelineStep step)
     {
-        logger.debug("No-op method: notifyCompleted({}) was called.",step);
+        switch (step.getStatus())
+        {
+            case COMPLETED:
+                logger.debug(
+                    "No-op method: notifyCompleted({}) was called.",
+                    step.getName());
+                break;
+
+            case COMPLETED_WITH_EXCEPTION:
+                logger.debug(
+                    "No-op method: notifyCompleted({}, {}) was called.",
+                    step.getName(),
+                    step
+                        .getException()
+                        .map(exception -> exception
+                            .getClass()
+                            .getSimpleName())
+                        .orElse("missing exception"));
+                break;
+
+            case IN_PROGRESS:
+                logger.error(
+                    "No-op method: notifyCompleted({}) was called but step still in-progress.",
+                    step.getName());
+                break;
+
+            case FAILED:
+                logger.error(
+                    "No-op method: notifyCompleted({}) was called but step failed.",
+                    step.getName());
+                break;
+        }
     }
 
     protected void
-    notifyCompleted(String step,PipelineException exception)
+    notifyFailed(PipelineStep step)
     {
-        logger.debug(
-            "No-op method: notifyCompleted({},{}) was called.",
-            step,
-            exception
-                .getClass()
-                .getSimpleName());
+        switch (step.getStatus())
+        {
+            case FAILED:
+                logger.debug(
+                    "No-op method: notifyFailed({}) was called.",
+                    step.getName());
+                break;
+
+            case COMPLETED:
+            case COMPLETED_WITH_EXCEPTION:
+                logger.error(
+                    "No-op method: notifyFailed({}) was called but step completed.",
+                    step.getName());
+                break;
+
+            case IN_PROGRESS:
+                logger.error(
+                    "No-op method: notifyFailed({}) was called but step still in-progress.",
+                    step.getName());
+                break;
+        }
     }
 
-    protected void
-    notifyFailed(String step,PipelineException exception)
+    private void
+    throwCurrentStepExistsException(PipelineStep current)
     {
-        logger.debug(
-            "No-op method: notifyFailed({},{}) was called.",
-            step,
-            exception
-                .getClass()
-                .getSimpleName());
+        throw
+            new IllegalStateException(
+                String.format("Current step: %s already exists.",current.getName()));
+    }
+
+    private void
+    complete(PipelineStep current)
+    {
+        current.complete();
+        previousSteps.add(current);
+    }
+
+    private void
+    completeWith(PipelineStep current,PipelineException exception)
+    {
+        current.completeWith(exception);
+        previousSteps.add(current);
+    }
+
+    private void
+    failWith(PipelineStep current,PipelineException exception)
+    {
+        current.failWith(exception);
+        previousSteps.add(current);
     }
 
     private boolean
-    isCompleted(StepResult result)
+    isFailed(PipelineStep step)
     {
-        StepStatus status = result.getStatus();
-
-        return status.equals(StepStatus.COMPLETED) || status.equals(StepStatus.COMPLETED_WITH_EXCEPTION);
-    }
-
-    private boolean
-    isFailed(StepResult result)
-    {
-        StepStatus status = result.getStatus();
+        StepStatus status = step.getStatus();
 
         return status.equals(StepStatus.FAILED);
     }
 
-    private List<StepResult>
-    accumulateResults(StepResult current)
+    private List<PipelineStep>
+    accumulateSteps(PipelineStep current)
     {
-        List<StepResult> accumulated = new ArrayList<>(previousResults);
+        List<PipelineStep> accumulated = new ArrayList<>(previousSteps);
 
-        accumulated.add(current);
+        if (!accumulated.stream().anyMatch(previous -> current == previous))
+            accumulated.add(current);
+
         return accumulated;
+    }
+
+    private StepStatus
+    getPreviousStatus()
+    {
+        return
+            previousSteps.isEmpty()
+                ? StepStatus.IN_PROGRESS
+                : previousSteps
+                    .getLast()
+                    .getStatus();
     }
 
     private boolean
     hasNonDuplicatedSteps()
     {
-        String currentStep = getStep();
-
         return
-            previousResults
-                .stream()
-                .anyMatch(
-                    previous ->
-                        previous
-                            .getStep()
-                            .equals(currentStep)) == false;
+            currentStep
+                .map(
+                    current ->
+                        previousSteps
+                            .stream()
+                            .anyMatch(previous -> current == previous))
+                .orElse(false);
     }
 }
 

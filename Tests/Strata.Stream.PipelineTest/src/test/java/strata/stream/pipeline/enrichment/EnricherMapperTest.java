@@ -40,9 +40,9 @@ class EnricherMapperTest
         ToUpperContext  toUpper  = enricherB.apply(toString);
 
         assertEquals("Value=1",toString.getValue());
-        assertEquals(2,toString.getAccumulatedResults().size());
+        assertEquals(2,toString.getAccumulatedSteps().size());
         assertEquals("VALUE=1",toUpper.getValue());
-        assertEquals(3,toUpper.getAccumulatedResults().size());
+        assertEquals(2,toUpper.getAccumulatedSteps().size());
     }
 }
 

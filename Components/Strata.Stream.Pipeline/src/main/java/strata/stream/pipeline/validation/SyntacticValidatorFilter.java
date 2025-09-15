@@ -6,8 +6,6 @@ package strata.stream.pipeline.validation;
 
 import strata.stream.pipeline.context.IPipelineContext;
 
-import java.util.function.Predicate;
-
 public
 class SyntacticValidatorFilter<T,C extends IPipelineContext<T>>
     implements ISyntacticValidatorFilter<T,C>

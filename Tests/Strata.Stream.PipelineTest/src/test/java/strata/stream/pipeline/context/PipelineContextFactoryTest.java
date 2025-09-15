@@ -26,15 +26,29 @@ class PipelineContextFactoryTest
         ToStringContext toString =
             new ToStringContextFactory().create(initial,"one");
         ToUpperContext toUpper =
-            new ToUpperContextFactory().create(toString.completeStep(),"ONE");
+            new ToUpperContextFactory()
+                .create(
+                    toString
+                        .startStep(".Next")
+                        .completeStep(),"ONE");
 
         assertEquals("one",toString.getValue());
-        assertEquals(2,toString.getAccumulatedResults().size());
-        assertEquals(StepStatus.COMPLETED,toString.getStatus());
+        assertEquals(2,toString.getAccumulatedSteps().size());
+        assertEquals(
+            StepStatus.COMPLETED,
+            toString
+                .getAccumulatedSteps()
+                .getLast()
+                .getStatus());
 
         assertEquals("ONE",toUpper.getValue());
-        assertEquals(3,toUpper.getAccumulatedResults().size());
-        assertEquals(StepStatus.IN_PROGRESS,toUpper.getStatus());
+        assertEquals(2,toUpper.getAccumulatedSteps().size());
+        assertEquals(
+            StepStatus.COMPLETED,
+            toUpper
+                .getAccumulatedSteps()
+                .getLast()
+                .getStatus());
     }
     @Test
     public void
@@ -53,14 +67,24 @@ class PipelineContextFactoryTest
         assertThrows(
             NullPointerException.class,
             () -> toString.getValue());
-        assertEquals(2,toString.getAccumulatedResults().size());
-        assertEquals(StepStatus.FAILED,toString.getStatus());
+        assertEquals(2,toString.getAccumulatedSteps().size());
+        assertEquals(
+            StepStatus.FAILED,
+            toString
+                .getAccumulatedSteps()
+                .getLast()
+                .getStatus());
 
         assertThrows(
             NullPointerException.class,
             () -> toUpper.getValue());
-        assertEquals(3,toUpper.getAccumulatedResults().size());
-        assertEquals(StepStatus.FAILED,toUpper.getStatus());
+        assertEquals(3,toUpper.getAccumulatedSteps().size());
+        assertEquals(
+            StepStatus.FAILED,
+            toUpper
+                .getAccumulatedSteps()
+                .getLast()
+                .getStatus());
     }
 
 }

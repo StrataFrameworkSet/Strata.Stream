@@ -6,8 +6,6 @@ package strata.stream.pipeline.validation;
 
 import strata.stream.pipeline.context.IPipelineContext;
 
-import java.util.function.Predicate;
-
 public
 class SemanticValidatorFilter<T,C extends IPipelineContext<T>>
     implements ISemanticValidatorFilter<T,C>

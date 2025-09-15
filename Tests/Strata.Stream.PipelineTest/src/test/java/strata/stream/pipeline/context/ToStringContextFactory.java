@@ -21,7 +21,7 @@ class ToStringContextFactory
         Optional<String>            value,
         Optional<PipelineException> exception)
     {
-        List<StepResult> accumulated = input.getAccumulatedResults();
+        List<PipelineStep> accumulated = input.getAccumulatedSteps();
 
         return
             ExtendedOptional

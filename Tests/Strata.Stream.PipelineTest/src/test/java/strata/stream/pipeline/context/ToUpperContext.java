@@ -16,41 +16,41 @@ class ToUpperContext
     implements IPipelineContext<String>
 {
     public
-    ToUpperContext(PipelineException exception,List<StepResult> previousResults)
+    ToUpperContext(PipelineException exception,List<PipelineStep> previousSteps)
     {
-        super("ToUpper",exception,previousResults);
+        super("ToUpper",exception,previousSteps);
     }
 
     public
-    ToUpperContext(String value,List<StepResult> previousResults)
+    ToUpperContext(String value,List<PipelineStep> previousSteps)
     {
-        super("ToUpper",value,previousResults);
+        super("ToUpper",value,previousSteps);
     }
 
     @Override
     public ToUpperContext
-    startStep(String step)
+    startStep(String step) throws IllegalStateException
     {
         return (ToUpperContext)super.startStep(step);
     }
 
     @Override
     public ToUpperContext
-    completeStep()
+    completeStep() throws IllegalStateException
     {
         return (ToUpperContext)super.completeStep();
     }
 
     @Override
     public ToUpperContext
-    completeStepWith(PipelineException exception)
+    completeStepWith(PipelineException exception) throws IllegalStateException
     {
         return (ToUpperContext)super.completeStepWith(exception);
     }
 
     @Override
     public ToUpperContext
-    failStepWith(PipelineException exception)
+    failStepWith(PipelineException exception) throws IllegalStateException
     {
         return (ToUpperContext)super.failStepWith(exception);
     }

@@ -9,8 +9,6 @@ import strata.stream.pipeline.context.IPipelineContext;
 import strata.stream.pipeline.context.IPipelineContextFactory;
 import strata.stream.pipeline.shared.PipelineException;
 
-import java.util.function.Function;
-
 public
 class TransformerMapper<
     I,
