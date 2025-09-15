@@ -4,8 +4,11 @@
 
 package strata.stream.pipeline.transformation;
 
+import java.io.Serializable;
+
 public
 interface ITransformer<I,O>
+    extends Serializable
 {
     O
     transform(I input) throws TransformationFailedException;

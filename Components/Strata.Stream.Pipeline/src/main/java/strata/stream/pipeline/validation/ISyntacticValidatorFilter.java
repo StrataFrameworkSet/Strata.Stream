@@ -4,12 +4,12 @@
 
 package strata.stream.pipeline.validation;
 
+import strata.stream.core.shared.IPredicate;
 import strata.stream.pipeline.context.IPipelineContext;
-
-import java.util.function.Predicate;
 
 public
 interface ISyntacticValidatorFilter<T,C extends IPipelineContext<T>>
-    extends Predicate<C> {}
+    extends IPredicate<C>
+{}
 
 //////////////////////////////////////////////////////////////////////////////

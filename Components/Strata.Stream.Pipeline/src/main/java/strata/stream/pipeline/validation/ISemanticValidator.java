@@ -4,8 +4,11 @@
 
 package strata.stream.pipeline.validation;
 
+import java.io.Serializable;
+
 public
 interface ISemanticValidator<T>
+    extends Serializable
 {
     void
     validate(T subject) throws SemanticValidationFailedException;

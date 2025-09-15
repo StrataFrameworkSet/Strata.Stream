@@ -4,9 +4,8 @@
 
 package strata.stream.pipeline.transformation;
 
+import strata.stream.core.shared.IFunction;
 import strata.stream.pipeline.context.IPipelineContext;
-
-import java.util.function.Function;
 
 public
 interface ITransformerMapper<
@@ -14,6 +13,7 @@ interface ITransformerMapper<
     O,
     CI extends IPipelineContext<I>,
     CO extends IPipelineContext<O>>
-    extends Function<CI,CO> {}
+    extends IFunction<CI,CO>
+{}
 
 //////////////////////////////////////////////////////////////////////////////

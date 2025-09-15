@@ -4,9 +4,8 @@
 
 package strata.stream.pipeline.enrichment;
 
+import strata.stream.core.shared.IFunction;
 import strata.stream.pipeline.context.IPipelineContext;
-
-import java.util.function.Function;
 
 public
 interface IEnricherMapper<
@@ -14,6 +13,6 @@ interface IEnricherMapper<
     O,
     CI extends IPipelineContext<I>,
     CO extends IPipelineContext<O>>
-    extends Function<CI,CO> {}
+    extends IFunction<CI,CO> {}
 
 //////////////////////////////////////////////////////////////////////////////

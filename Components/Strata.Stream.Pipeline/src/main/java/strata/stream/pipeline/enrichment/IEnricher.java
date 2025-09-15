@@ -4,8 +4,11 @@
 
 package strata.stream.pipeline.enrichment;
 
+import java.io.Serializable;
+
 public
 interface IEnricher<I,O>
+    extends Serializable
 {
     O
     enrich(I input) throws EnrichmentFailedException;
