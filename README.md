@@ -5,6 +5,11 @@
 
 Stream processing components and utilities for building robust, scalable enterprise streaming applications in the Strata Framework Set. This library provides core stream abstractions, Apache Flink integration, Apache Kafka integration, pipeline processing, and enterprise patterns for building high-performance stream processing applications.
 
+## Purpose
+- Provide a unified developer experience across popular frameworks, libraries, and language platforms.
+- Reduce impedance mismatch between different technologies.
+- Facilitate rapid development of enterprise-grade applications with best practices and design patterns.
+
 ## Features
 
 - **Core Stream Abstractions**: Essential interfaces and utilities for enterprise stream processing application development
