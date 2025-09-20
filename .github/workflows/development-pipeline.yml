@@ -90,5 +90,14 @@ jobs:
           docker run ghcr.io/johnliebenau/strata/strata-stream-testsuite:1.0.0-SNAPSHOT \
             --package=strata.stream --tags=AcceptanceStage
 
+  run-deploy-stage:
+    runs-on: ubuntu-latest
+    needs: run-acceptance-stage
+    steps:
+      - name: Publish Jars with Gradle
+        uses: gradle/gradle-build-action@749f47bda3e44aa060e82d7b3ef7e40d953bd629
+        with:
+          gradle-executable: gradlew
+          arguments: publish
 
 
