@@ -127,5 +127,5 @@ jobs:
         uses: gradle/gradle-build-action@749f47bda3e44aa060e82d7b3ef7e40d953bd629
         with:
           gradle-executable: gradlew
-          arguments: publishAllPublicationsToGitHubPackagesRepository -x test -x build
+          arguments: publishAllPublicationsToGitHubPackagesRepository -x test -x build -x jar -x compileJava -x processResources -x classes
 
