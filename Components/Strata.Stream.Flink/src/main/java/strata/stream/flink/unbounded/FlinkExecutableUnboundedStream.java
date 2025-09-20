@@ -9,7 +9,6 @@ import strata.stream.core.shared.IStreamExecution;
 import strata.stream.core.unbounded.IExecutionDriver;
 
 import java.util.Properties;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 
 public

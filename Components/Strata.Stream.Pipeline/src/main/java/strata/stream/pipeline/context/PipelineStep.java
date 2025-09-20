@@ -6,18 +6,20 @@ package strata.stream.pipeline.context;
 
 import strata.stream.pipeline.shared.PipelineException;
 
+import java.io.Serializable;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Optional;
 
 public
 class PipelineStep
+    implements Serializable
 {
-    private final IPipelineContext<?>   context;
-    private final String                name;
-    private StepStatus                  status;
-    private final Instant               begin;
-    private Instant                     end;
+    private final IPipelineContext<?> context;
+    private final String name;
+    private StepStatus status;
+    private final Instant begin;
+    private Instant end;
     private Optional<PipelineException> exception;
 
     public
@@ -40,11 +42,11 @@ class PipelineStep
     public
     PipelineStep(IPipelineContext<?> context,String name,PipelineException exception)
     {
-        this.context   = context;
-        this.name      = name;
-        this.status    = StepStatus.FAILED;
-        this.begin     = Instant.now();
-        this.end       = Instant.now();
+        this.context = context;
+        this.name = name;
+        this.status = StepStatus.FAILED;
+        this.begin = Instant.now();
+        this.end = Instant.now();
         this.exception = Optional.ofNullable(exception);
     }
 
@@ -52,7 +54,7 @@ class PipelineStep
     complete()
     {
         this.status = StepStatus.COMPLETED;
-        this.end    = Instant.now();
+        this.end = Instant.now();
 
         return this;
     }
@@ -60,8 +62,8 @@ class PipelineStep
     public PipelineStep
     completeWith(PipelineException exception)
     {
-        this.status    = StepStatus.COMPLETED_WITH_EXCEPTION;
-        this.end       = Instant.now();
+        this.status = StepStatus.COMPLETED_WITH_EXCEPTION;
+        this.end = Instant.now();
         this.exception = Optional.ofNullable(exception);
 
         return this;
@@ -70,21 +72,30 @@ class PipelineStep
     public PipelineStep
     failWith(PipelineException exception)
     {
-        this.status    = StepStatus.FAILED;
-        this.end       = Instant.now();
+        this.status = StepStatus.FAILED;
+        this.end = Instant.now();
         this.exception = Optional.ofNullable(exception);
 
         return this;
     }
 
     public IPipelineContext<?>
-    getContext() { return context; }
+    getContext()
+    {
+        return context;
+    }
 
     public String
-    getName() { return name; }
+    getName()
+    {
+        return name;
+    }
 
     public StepStatus
-    getStatus() { return status; }
+    getStatus()
+    {
+        return status;
+    }
 
     public Duration
     getDuration()
@@ -96,7 +107,10 @@ class PipelineStep
     }
 
     public Optional<PipelineException>
-    getException() { return exception; }
+    getException()
+    {
+        return exception;
+    }
 
     public static PipelineStep
     of(IPipelineContext<?> context,String name)

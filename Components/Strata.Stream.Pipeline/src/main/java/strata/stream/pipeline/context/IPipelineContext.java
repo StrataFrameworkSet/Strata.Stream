@@ -7,11 +7,13 @@ package strata.stream.pipeline.context;
 import strata.foundation.core.utility.Conditional;
 import strata.stream.pipeline.shared.PipelineException;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.Optional;
 
 public
-interface IPipelineContext<T>
+interface IPipelineContext<T extends Serializable>
+    extends Serializable
 {
     IPipelineContext<T>
     startStep(String step) throws IllegalStateException;

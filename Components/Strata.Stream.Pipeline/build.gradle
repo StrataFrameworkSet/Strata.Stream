@@ -11,8 +11,8 @@ sourceSets {
 
 apply plugin: 'maven-publish'
 
-group 'strata.stream'
-version "$major$minor$patch"
+group = 'strata.stream'
+version = "$major$minor$patch"
 
 task sourceJar(type: Jar) {
     from sourceSets.main.allJava
@@ -23,16 +23,15 @@ publishing {
         StrataStreamPipeline(MavenPublication) {
             artifactId = 'strata-stream-pipeline'
             from components.java
-
-            repositories {
-                maven {
-                    name "GitHubPackages"
-                    url "https://maven.pkg.github.com/StrataFrameworkSet/repository"
-                    credentials {
-                        username = "$System.env.REPOSITORY_USER"
-                        password = "$System.env.REPOSITORY_PASSWORD"
-                    }
-                }
+        }
+    }
+    repositories {
+        maven {
+            name = "GitHubPackages"
+            url = "https://maven.pkg.github.com/StrataFrameworkSet/repository"
+            credentials {
+                username = "$System.env.REPOSITORY_USER"
+                password = "$System.env.REPOSITORY_PASSWORD"
             }
         }
     }

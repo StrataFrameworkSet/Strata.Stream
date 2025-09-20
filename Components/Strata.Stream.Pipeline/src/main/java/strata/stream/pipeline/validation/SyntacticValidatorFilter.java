@@ -6,8 +6,12 @@ package strata.stream.pipeline.validation;
 
 import strata.stream.pipeline.context.IPipelineContext;
 
+import java.io.Serializable;
+
 public
-class SyntacticValidatorFilter<T,C extends IPipelineContext<T>>
+class SyntacticValidatorFilter<
+    T extends Serializable,
+    C extends IPipelineContext<T>>
     implements ISyntacticValidatorFilter<T,C>
 {
     private final ISyntacticValidator<T> validator;

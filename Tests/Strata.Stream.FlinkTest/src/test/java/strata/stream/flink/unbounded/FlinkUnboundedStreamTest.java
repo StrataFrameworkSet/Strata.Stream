@@ -11,15 +11,11 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import strata.stream.core.bounded.IBoundedStream;
 import strata.stream.core.shared.IFunction;
-import strata.stream.core.unbounded.AbstractUnboundedStreamTest;
-import strata.stream.core.unbounded.ChronicleMapUnboundedStreamSink;
-import strata.stream.core.unbounded.IExecutionDriver;
-import strata.stream.core.unbounded.IUnboundedStream;
+import strata.stream.core.unbounded.*;
 
 import java.util.stream.Collectors;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static strata.foundation.core.concurrent.Awaiter.await;
 
 @Tag("CommitStage")
@@ -80,102 +76,124 @@ class FlinkUnboundedStreamTest
         super.testFlatMap();
     }
 
-    /*
-    @Test
-    public void
-    testFilter() throws Exception
-    {
-        String foo                  = "foo";
-        ListBoundedStreamSink<String> sink = new ListBoundedStreamSink<>();
-
-        execute(
-            subject
-                .filter(e -> !e.equals(foo))
-                .sinkTo(sink));
-
-        assertFalse(sink.getStore().isEmpty());
-        assertFalse(
-            sink
-                .getStore()
-                .contains(foo));
-    }
-
-    @Test
-    public void
-    testMap() throws Exception
-    {
-        ListBoundedStreamSink<String> sink = new ListBoundedStreamSink<>();
-
-        execute(
-            subject
-                .map(e -> e.toUpperCase())
-                .sinkTo(sink));
-
-        assertFalse(sink.getStore().isEmpty());
-        assertTrue(
-            sink
-                .getStore()
-                .stream()
-                .allMatch(e -> e.toUpperCase().equals(e)));
-    }
-
-    @Test
-    public void
-    testFlatMap() throws Exception
-    {
-        ListBoundedStreamSink<String> sink = new ListBoundedStreamSink<>();
-
-        execute(
-            subject
-                .flatMap(e -> BasicBoundedStream.of(List.of(e.toUpperCase())))
-                .sinkTo(sink));
-
-        assertFalse(sink.getStore().isEmpty());
-        assertTrue(
-            sink
-                .getStore()
-                .stream()
-                .allMatch(e -> e.toUpperCase().equals(e)));
-    }
-
     @Test
     public void
     testForEach() throws Exception
     {
-        IStream<String> other = getSubject("aaaaa","bbb","foo","cccccccccc","dddddddd","foo");
-        ListBoundedStreamSink<String> sink = new ListBoundedStreamSink<>();
-        List<String>           list = new ArrayList<>();
-
-        execute(
-            other
-                .map(e -> e.toUpperCase())
-                .sinkTo(sink));
-
-        execute(subject.forEach(e -> list.add(e.toUpperCase())));
-
-        assertFalse(sink.getStore().isEmpty());
-        assertIterableEquals(sink.getStore(),list);
+        super.testForEach();
     }
+
 
     @Test
     public void
-    testSinkTo() throws Exception
+    testForEachAgain() throws Exception
     {
-        ListBoundedStreamSink<String> sink = new ListBoundedStreamSink<>();
+        IUnboundedStream<String> stream =
+            getSubject("aaaaa","bbb","foo","cccccccccc","dddddddd","foo");
 
-        execute(
-            subject
-                .map(e -> e.toUpperCase())
-                .sinkTo(sink));
-
-        assertFalse(sink.getStore().isEmpty());
-        assertTrue(
-            sink
-                .getStore()
-                .stream()
-                .allMatch(e -> e.toUpperCase().equals(e)));
+        await(
+            stream
+                .forEach(e -> System.out.println(e))
+                .execute(getDriver())
+                .thenCompose(execution -> execution.getResult()));
     }
-*/
+
+    /*
+        @Test
+        public void
+        testFilter() throws Exception
+        {
+            String foo                  = "foo";
+            ListBoundedStreamSink<String> sink = new ListBoundedStreamSink<>();
+
+            execute(
+                subject
+                    .filter(e -> !e.equals(foo))
+                    .sinkTo(sink));
+
+            assertFalse(sink.getStore().isEmpty());
+            assertFalse(
+                sink
+                    .getStore()
+                    .contains(foo));
+        }
+
+        @Test
+        public void
+        testMap() throws Exception
+        {
+            ListBoundedStreamSink<String> sink = new ListBoundedStreamSink<>();
+
+            execute(
+                subject
+                    .map(e -> e.toUpperCase())
+                    .sinkTo(sink));
+
+            assertFalse(sink.getStore().isEmpty());
+            assertTrue(
+                sink
+                    .getStore()
+                    .stream()
+                    .allMatch(e -> e.toUpperCase().equals(e)));
+        }
+
+        @Test
+        public void
+        testFlatMap() throws Exception
+        {
+            ListBoundedStreamSink<String> sink = new ListBoundedStreamSink<>();
+
+            execute(
+                subject
+                    .flatMap(e -> BasicBoundedStream.of(List.of(e.toUpperCase())))
+                    .sinkTo(sink));
+
+            assertFalse(sink.getStore().isEmpty());
+            assertTrue(
+                sink
+                    .getStore()
+                    .stream()
+                    .allMatch(e -> e.toUpperCase().equals(e)));
+        }
+
+        @Test
+        public void
+        testForEach() throws Exception
+        {
+            IStream<String> other = getSubject("aaaaa","bbb","foo","cccccccccc","dddddddd","foo");
+            ListBoundedStreamSink<String> sink = new ListBoundedStreamSink<>();
+            List<String>           list = new ArrayList<>();
+
+            execute(
+                other
+                    .map(e -> e.toUpperCase())
+                    .sinkTo(sink));
+
+            execute(subject.forEach(e -> list.add(e.toUpperCase())));
+
+            assertFalse(sink.getStore().isEmpty());
+            assertIterableEquals(sink.getStore(),list);
+        }
+
+        @Test
+        public void
+        testSinkTo() throws Exception
+        {
+            ListBoundedStreamSink<String> sink = new ListBoundedStreamSink<>();
+
+            execute(
+                subject
+                    .map(e -> e.toUpperCase())
+                    .sinkTo(sink));
+
+            assertFalse(sink.getStore().isEmpty());
+            assertTrue(
+                sink
+                    .getStore()
+                    .stream()
+                    .allMatch(e -> e.toUpperCase().equals(e)));
+        }
+    */
     @Override
     protected IUnboundedStream<String>
     getSubject(String... elements)

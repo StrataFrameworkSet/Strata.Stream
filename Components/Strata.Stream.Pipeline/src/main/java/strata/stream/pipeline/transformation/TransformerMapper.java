@@ -9,10 +9,12 @@ import strata.stream.pipeline.context.IPipelineContext;
 import strata.stream.pipeline.context.IPipelineContextFactory;
 import strata.stream.pipeline.shared.PipelineException;
 
+import java.io.Serializable;
+
 public
 class TransformerMapper<
-    I,
-    O,
+    I extends Serializable,
+    O extends Serializable,
     CI extends IPipelineContext<I>,
     CO extends IPipelineContext<O>>
     implements ITransformerMapper<I,O,CI,CO>

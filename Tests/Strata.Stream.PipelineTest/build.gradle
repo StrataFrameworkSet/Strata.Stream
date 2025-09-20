@@ -9,11 +9,12 @@ sourceSets {
     test.resources.srcDirs = ['src/test/resources']
 }
 
-group 'strata.stream'
-version '1.0-SNAPSHOT'
+group = 'strata.stream'
+version = '1.0-SNAPSHOT'
 
 dependencies {
     testImplementation project(':Components:Strata.Stream.Pipeline')
+    testImplementation project(':Components:Strata.Stream.Flink')
     testImplementation project(':Components:Strata.Stream.Basic')
     testImplementation(testFixtures(project(':Tests:Strata.Stream.CoreTest')))
     testImplementation 'org.slf4j:slf4j-api:2.0.0-alpha7'
@@ -22,6 +23,26 @@ dependencies {
     testImplementation "org.junit.jupiter:junit-jupiter-params:$junit_jupiter_version"
     testImplementation "org.junit.jupiter:junit-jupiter-api:$junit_jupiter_version"
     testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$junit_jupiter_version"
+}
+
+configurations {
+    testArtifacts
+}
+
+tasks.register('testJar', Jar) {
+    archiveClassifier = 'tests'
+    from sourceSets.test.output
+    from sourceSets.test.resources
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
+
+tasks.named("testJar").configure {
+    dependsOn testClasses
+}
+
+artifacts {
+    archives testJar
+    testArtifacts testJar
 }
 
 test {
@@ -38,5 +59,7 @@ test {
             '--add-opens=java.base/sun.nio.ch=ALL-UNNAMED',
             '--add-opens=java.base/java.io=ALL-UNNAMED',
             '--add-opens=java.base/jdk.internal.ref=ALL-UNNAMED',
+            '--add-opens=java.base/java.util.concurrent.locks=ALL-UNNAMED',
+            '--add-opens=java.base/java.util.concurrent.atomic=ALL-UNNAMED',
             '--add-opens=jdk.compiler/com.sun.tools.javac.file=ALL-UNNAMED']
 }

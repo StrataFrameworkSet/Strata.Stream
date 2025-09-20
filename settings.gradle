@@ -11,20 +11,20 @@ dependencyResolutionManagement {
         mavenCentral()
         mavenLocal()
         maven {
-            name "GitHub-StrataFrameworkSet-Packages"
-            url "https://maven.pkg.github.com/StrataFrameworkSet/repository"
+            name = "GitHub-StrataFrameworkSet-Packages"
+            url = "https://maven.pkg.github.com/StrataFrameworkSet/repository"
             credentials {
                 username = "$System.env.REPOSITORY_USER"
                 password = "$System.env.REPOSITORY_PASSWORD"
             }
         }
         maven {
-            name "Confluent"
-            url "https://packages.confluent.io/maven"
+            name = "Confluent"
+            url = "https://packages.confluent.io/maven"
         }
         maven {
-            name "Jabylon"
-            url "https://www.jabylon.org/maven/"
+            name = "Jabylon"
+            url = "https://www.jabylon.org/maven/"
         }
     }
 }
@@ -43,3 +43,4 @@ include 'Tests:Strata.Stream.BasicTest'
 include 'Tests:Strata.Stream.FlinkTest'
 include 'Tests:Strata.Stream.KafkaTest'
 include 'Tests:Strata.Stream.PipelineTest'
+include 'Tests:Strata.Stream.TestSuite'

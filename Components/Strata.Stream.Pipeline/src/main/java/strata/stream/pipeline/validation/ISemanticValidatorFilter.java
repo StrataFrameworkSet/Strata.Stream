@@ -7,8 +7,12 @@ package strata.stream.pipeline.validation;
 import strata.stream.core.shared.IPredicate;
 import strata.stream.pipeline.context.IPipelineContext;
 
+import java.io.Serializable;
+
 public
-interface ISemanticValidatorFilter<T,C extends IPipelineContext<T>>
+interface ISemanticValidatorFilter<
+    T extends Serializable,
+    C extends IPipelineContext<T>>
     extends IPredicate<C>
 {}
 

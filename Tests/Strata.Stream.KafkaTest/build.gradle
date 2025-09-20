@@ -9,8 +9,8 @@ sourceSets {
     test.resources.srcDirs = ['src/test/resources']
 }
 
-group 'strata.stream'
-version '1.0-SNAPSHOT'
+group = 'strata.stream'
+version = '1.0-SNAPSHOT'
 
 dependencies {
     testImplementation project(':Components:Strata.Stream.Kafka')
@@ -23,6 +23,26 @@ dependencies {
     testImplementation "org.junit.jupiter:junit-jupiter-params:$junit_jupiter_version"
     testImplementation "org.junit.jupiter:junit-jupiter-api:$junit_jupiter_version"
     testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$junit_jupiter_version"
+}
+
+configurations {
+    testArtifacts
+}
+
+tasks.register('testJar', Jar) {
+    archiveClassifier = 'tests'
+    from sourceSets.test.output
+    from sourceSets.test.resources
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
+
+tasks.named("testJar").configure {
+    dependsOn testClasses
+}
+
+artifacts {
+    archives testJar
+    testArtifacts testJar
 }
 
 test {

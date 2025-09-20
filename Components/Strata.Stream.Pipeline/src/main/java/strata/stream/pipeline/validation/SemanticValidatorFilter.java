@@ -4,10 +4,15 @@
 
 package strata.stream.pipeline.validation;
 
+import strata.foundation.core.event.SendResult;
 import strata.stream.pipeline.context.IPipelineContext;
 
+import java.io.Serializable;
+
 public
-class SemanticValidatorFilter<T,C extends IPipelineContext<T>>
+class SemanticValidatorFilter<
+    T extends Serializable,
+    C extends IPipelineContext<T>>
     implements ISemanticValidatorFilter<T,C>
 {
     private final ISemanticValidator<T> validator;

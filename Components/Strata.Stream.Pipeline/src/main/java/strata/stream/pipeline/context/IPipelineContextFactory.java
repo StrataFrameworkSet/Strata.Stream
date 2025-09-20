@@ -6,20 +6,21 @@ package strata.stream.pipeline.context;
 
 import strata.stream.pipeline.shared.PipelineException;
 
+import java.io.Serializable;
 import java.util.Optional;
 
 public
 interface IPipelineContextFactory<
-    I,
-    O,
+    I extends Serializable,
+    O extends Serializable,
     CI extends IPipelineContext<I>,
     CO extends IPipelineContext<O>>
+    extends Serializable
 {
     CO
     create(CI input,Optional<O> value,Optional<PipelineException> exception);
 
-    default
-    CO
+    default CO
     create(CI input,O value)
     {
         return
@@ -27,10 +28,11 @@ interface IPipelineContextFactory<
                 input,
                 Optional.ofNullable(value),
                 Optional.empty());
-    };
+    }
 
-    default
-    CO
+    ;
+
+    default CO
     create(CI input,PipelineException exception)
     {
         return
@@ -38,7 +40,9 @@ interface IPipelineContextFactory<
                 input,
                 Optional.empty(),
                 Optional.ofNullable(exception));
-    };
+    }
+
+    ;
 }
 
 //////////////////////////////////////////////////////////////////////////////

@@ -26,7 +26,7 @@ class AbstractExecutableUnboundedStream<T>
     public <K> IKeyedUnboundedStream<K,T>
     keyBy(IKeySelector<K,T> selector)
     {
-        logger.debug("keyBy({})", selector);
+        //logger.debug("keyBy({})", selector);
         return getStream().keyBy(selector);
     }
 
@@ -34,7 +34,7 @@ class AbstractExecutableUnboundedStream<T>
     public ITimeWindowedUnboundedStream<T>
     windowBy(TimeAmount window)
     {
-        logger.debug("windowBy({})", window);
+        //logger.debug("windowBy({})", window);
         return getStream().windowBy(window);
     }
 
@@ -42,7 +42,7 @@ class AbstractExecutableUnboundedStream<T>
     public IExecutableUnboundedStream<T>
     filter(IPredicate<? super T> predicate)
     {
-        logger.debug("filter({})", predicate);
+        //logger.debug("filter({})", predicate);
         return getStream().filter(predicate);
     }
 
@@ -50,7 +50,7 @@ class AbstractExecutableUnboundedStream<T>
     public <R> IExecutableUnboundedStream<R>
     map(IFunction<? super T,? extends R> mapper)
     {
-        logger.debug("map({})", mapper);
+        //logger.debug("map({})", mapper);
         return getStream().map(mapper);
     }
 
@@ -58,7 +58,7 @@ class AbstractExecutableUnboundedStream<T>
     public <R> IExecutableUnboundedStream<R>
     flatMap(IFunction<T,Iterable<R>> mapper)
     {
-        logger.debug("flatMap({})", mapper);
+        //logger.debug("flatMap({})", mapper);
         return getStream().flatMap(mapper);
     }
 
@@ -66,7 +66,7 @@ class AbstractExecutableUnboundedStream<T>
     public IUnboundedStreamExecutor
     forEach(IConsumer<? super T> action)
     {
-        logger.debug("forEach({})", action);
+        //logger.debug("forEach({})", action);
         return getStream().forEach(action);
     }
 
@@ -74,7 +74,7 @@ class AbstractExecutableUnboundedStream<T>
     public IUnboundedStreamExecutor
     sinkTo(IUnboundedStreamSink<T> sink)
     {
-        logger.debug("sinkTo({})", sink);
+        //logger.debug("sinkTo({})", sink);
         return getStream().sinkTo(sink);
     }
 

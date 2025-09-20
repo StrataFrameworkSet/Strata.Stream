@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN">
+    <Appenders>
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/>
+        </Console>
+    </Appenders>
+
+    <Loggers>
+        <!-- Your Strata package loggers -->
+        <Logger name="strata" level="DEBUG" additivity="false">
+            <AppenderRef ref="Console"/>
+        </Logger>
+        <Logger name="strata.stream" level="TRACE" additivity="false">
+            <AppenderRef ref="Console"/>
+        </Logger>
+        <Logger name="strata.stream.kafka" level="TRACE" additivity="false">
+            <AppenderRef ref="Console"/>
+        </Logger>
+
+        <!-- Kafka Streams loggers -->
+        <Logger name="org.apache.kafka.streams" level="DEBUG" additivity="false">
+            <AppenderRef ref="Console"/>
+        </Logger>
+        <Logger name="org.apache.kafka.streams.processor" level="TRACE" additivity="false">
+            <AppenderRef ref="Console"/>
+        </Logger>
+
+        <!-- Flink Streams loggers -->
+        <Logger name="org.apache.flink.connector.datagen.functions.FromElementsGeneratorFunction" level="DEBUG" additivity="false">
+            <AppenderRef ref="Console"/>
+        </Logger>
+
+
+        <Root level="INFO">
+            <AppenderRef ref="Console"/>
+        </Root>
+    </Loggers>
+</Configuration>

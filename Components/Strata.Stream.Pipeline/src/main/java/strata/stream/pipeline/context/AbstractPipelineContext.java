@@ -9,20 +9,20 @@ import org.apache.logging.log4j.Logger;
 import strata.foundation.core.utility.Conditional;
 import strata.stream.pipeline.shared.PipelineException;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
 public abstract
-class AbstractPipelineContext<T>
+class AbstractPipelineContext<T extends Serializable>
     implements IPipelineContext<T>
 {
     private String                   stepPrefix;
     private T                        value;
     private final List<PipelineStep> previousSteps;
     private Optional<PipelineStep>   currentStep;
-    private final Logger             logger;
 
     @SuppressWarnings("unchecked")
     protected
@@ -47,7 +47,6 @@ class AbstractPipelineContext<T>
         this.value = value;
         this.previousSteps = new ArrayList<>(previousSteps);
         this.currentStep = Optional.empty();
-        this.logger = LogManager.getLogger(getClass());
     }
 
     protected
@@ -60,7 +59,6 @@ class AbstractPipelineContext<T>
         this.value = null;
         this.previousSteps = new ArrayList<>(previousSteps);
         this.currentStep = Optional.of(PipelineStep.of(this,stepPrefix,exception));
-        this.logger = LogManager.getLogger(getClass());
     }
 
     @Override
@@ -69,7 +67,10 @@ class AbstractPipelineContext<T>
     {
         currentStep.ifPresent(current -> throwCurrentStepExistsException(current));
         currentStep = Optional.of(new PipelineStep(this,stepPrefix + step));
-        logger.info("Starting step {}.",getCurrentStep());
+        getCurrentStep()
+            .ifPresentOrElse(current ->
+                getLogger().info("Starting step {}.",current.getName()),
+                () -> getLogger().error("Current step not present."));
         return this;
     }
 
@@ -84,24 +85,24 @@ class AbstractPipelineContext<T>
         switch (current.getStatus())
         {
             case IN_PROGRESS:
-                logger.info("Completed step {}.",current.getName());
+                getLogger().info("Completed step {}.",current.getName());
                 complete(current);
                 notifyCompleted(current);
                 currentStep = Optional.empty();
                 break;
 
             case COMPLETED:
-                logger.warn("Step {} already completed.",current.getName());
+                getLogger().warn("Step {} already completed.",current.getName());
                 break;
 
             case COMPLETED_WITH_EXCEPTION:
-                logger.error(
+                getLogger().error(
                     "Step {} already completed with exception.",
                     current.getName());
                 throw new IllegalStateException("Step already completed with exception.");
 
             case FAILED:
-                logger.error(
+                getLogger().error(
                     "Step {} already failed.",
                     current.getName());
                 throw new IllegalStateException("Step already failed.");
@@ -121,7 +122,7 @@ class AbstractPipelineContext<T>
         switch (current.getStatus())
         {
             case IN_PROGRESS:
-                logger.info(
+                getLogger().info(
                     "Completed step {} with exception {}.",
                     current.getName(),
                     Objects.toString(
@@ -133,13 +134,13 @@ class AbstractPipelineContext<T>
                 break;
 
             case COMPLETED_WITH_EXCEPTION:
-                logger.warn(
+                getLogger().warn(
                     "Step {} already completed with exception.",
                     current.getName());
                 break;
 
             case COMPLETED:
-                logger.error(
+                getLogger().error(
                     "Step {} already completed.",
                     current.getName());
                 throw
@@ -147,7 +148,7 @@ class AbstractPipelineContext<T>
                         "Step already completed.");
 
             case FAILED:
-                logger.error(
+                getLogger().error(
                     "Step {} already failed.",
                     current.getName());
                 throw
@@ -169,7 +170,7 @@ class AbstractPipelineContext<T>
         switch (current.getStatus())
         {
             case IN_PROGRESS:
-                logger.error(
+                getLogger().error(
                     "Step {} failed with exception {}.",
                     getCurrentStep(),
                     Objects.toString(
@@ -181,19 +182,19 @@ class AbstractPipelineContext<T>
                 break;
 
             case FAILED:
-                logger.warn(
+                getLogger().warn(
                     "Step {} already failed with exception.",
                     current.getName());
                 break;
 
             case COMPLETED:
-                logger.error(
+                getLogger().error(
                     "Step {} already completed.",
                     current.getName());
                 throw new IllegalStateException("Step already completed.");
 
             case COMPLETED_WITH_EXCEPTION:
-                logger.error(
+                getLogger().error(
                     "Step {} already completed with exception.",
                     current.getName());
                 throw new IllegalStateException("Step already completed with exception.");
@@ -232,7 +233,7 @@ class AbstractPipelineContext<T>
     public Conditional
     recover(PipelineException exception)
     {
-        logger.debug(
+        getLogger().debug(
             "No-op method: recover({}) was called.",
             exception
                 .getClass()
@@ -256,7 +257,7 @@ class AbstractPipelineContext<T>
     protected Logger
     getLogger()
     {
-        return logger;
+        return LogManager.getLogger(getClass());
     }
 
     protected void
@@ -265,13 +266,13 @@ class AbstractPipelineContext<T>
         switch (step.getStatus())
         {
             case COMPLETED:
-                logger.debug(
+                getLogger().debug(
                     "No-op method: notifyCompleted({}) was called.",
                     step.getName());
                 break;
 
             case COMPLETED_WITH_EXCEPTION:
-                logger.debug(
+                getLogger().debug(
                     "No-op method: notifyCompleted({}, {}) was called.",
                     step.getName(),
                     step
@@ -283,13 +284,13 @@ class AbstractPipelineContext<T>
                 break;
 
             case IN_PROGRESS:
-                logger.error(
+                getLogger().error(
                     "No-op method: notifyCompleted({}) was called but step still in-progress.",
                     step.getName());
                 break;
 
             case FAILED:
-                logger.error(
+                getLogger().error(
                     "No-op method: notifyCompleted({}) was called but step failed.",
                     step.getName());
                 break;
@@ -302,20 +303,20 @@ class AbstractPipelineContext<T>
         switch (step.getStatus())
         {
             case FAILED:
-                logger.debug(
+                getLogger().debug(
                     "No-op method: notifyFailed({}) was called.",
                     step.getName());
                 break;
 
             case COMPLETED:
             case COMPLETED_WITH_EXCEPTION:
-                logger.error(
+                getLogger().error(
                     "No-op method: notifyFailed({}) was called but step completed.",
                     step.getName());
                 break;
 
             case IN_PROGRESS:
-                logger.error(
+                getLogger().error(
                     "No-op method: notifyFailed({}) was called but step still in-progress.",
                     step.getName());
                 break;

@@ -15,5 +15,5 @@ ext {
     patch = "-SNAPSHOT"
 }
 
-group 'strata.stream'
-version "$major$minor$patch"
+group = 'strata.stream'
+version = "$major$minor$patch"
