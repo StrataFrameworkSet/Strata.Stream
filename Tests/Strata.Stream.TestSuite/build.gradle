@@ -56,11 +56,10 @@ publishing {
 jib {
     from {
         image = "amazoncorretto:22-alpine"
-        /*
         auth {
             username = "$System.env.DOCKER_USER"
             password = "$System.env.DOCKER_PASSWORD"
-        }*/
+        }
     }
     to {
         image = "ghcr.io/johnliebenau/strata/strata-stream-testsuite"
