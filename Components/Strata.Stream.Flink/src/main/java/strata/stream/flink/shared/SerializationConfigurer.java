@@ -29,7 +29,8 @@ class SerializationConfigurer
                     getConfigurationString(EmailAddress.class,EmailAddressSerializer.class),
                     getConfigurationString(PostalAddress.class,PostalAddressSerializer.class),
                     getConfigurationString(PostalCode.class,PostalCodeSerializer.class),
-                    getConfigurationString(GeoLocation.class,GeoLocationSerializer.class)));
+                    getConfigurationString(GeoLocation.class,GeoLocationSerializer.class)))
+            .set(PipelineOptions.FORCE_KRYO,true);
 
         environment.configure(configuration);
         return environment;
