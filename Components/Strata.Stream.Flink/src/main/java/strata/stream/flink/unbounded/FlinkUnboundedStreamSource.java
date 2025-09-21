@@ -10,6 +10,7 @@ import org.apache.flink.api.connector.source.SourceSplit;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import strata.stream.core.unbounded.AbstractUnboundedStreamSource;
 import strata.stream.core.unbounded.IUnboundedStream;
+import strata.stream.flink.shared.SerializationConfigurer;
 
 import java.util.Optional;
 
@@ -29,10 +30,12 @@ class FlinkUnboundedStreamSource<T,S extends SourceSplit,C>
         stream =
             Optional.of(
                 new FlinkUnboundedStream<>(
-                    environment.fromSource(
-                        source,
-                        WatermarkStrategy.forMonotonousTimestamps(),
-                        sourceName)));
+                    new SerializationConfigurer()
+                        .configure(environment)
+                        .fromSource(
+                            source,
+                            WatermarkStrategy.forMonotonousTimestamps(),
+                            sourceName)));
     }
 
     @Override

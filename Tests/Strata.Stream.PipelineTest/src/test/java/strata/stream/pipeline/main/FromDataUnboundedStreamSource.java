@@ -8,6 +8,7 @@ import org.apache.flink.streaming.api.environment.LocalStreamEnvironment;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import strata.stream.core.unbounded.AbstractUnboundedStreamSource;
 import strata.stream.core.unbounded.IUnboundedStream;
+import strata.stream.flink.shared.SerializationConfigurer;
 import strata.stream.flink.unbounded.FlinkUnboundedStream;
 
 import java.util.Optional;
@@ -23,7 +24,8 @@ class FromDataUnboundedStreamSource<T>
     FromDataUnboundedStreamSource(Class<T> type,T... elements)
     {
         StreamExecutionEnvironment environment =
-            LocalStreamEnvironment.createLocalEnvironment();
+            new SerializationConfigurer()
+                .configure(LocalStreamEnvironment.createLocalEnvironment());
 
         environment
             .getConfig()
