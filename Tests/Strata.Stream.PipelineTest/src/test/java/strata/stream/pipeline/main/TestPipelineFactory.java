@@ -18,7 +18,7 @@ import strata.stream.pipeline.validation.IInitialContextSyntacticValidatorFilter
 
 public
 class TestPipelineFactory
-    extends AbstractPipelineFactory<Long>
+    extends AbstractPipelineFactory<Long,IUnboundedStreamSource<Long>>
     implements ITestPipelineFactory
 {
     private final IInitialContextSyntacticValidatorFilter         syntactic;

@@ -8,23 +8,23 @@ import strata.stream.core.unbounded.IUnboundedStreamExecutor;
 import strata.stream.core.unbounded.IUnboundedStreamSource;
 
 public abstract
-class AbstractPipelineFactory<I>
+class AbstractPipelineFactory<I,S extends IUnboundedStreamSource<I>>
     implements IPipelineFactory<I>
 {
     public IPipeline<I>
     create(Class<I> inputType,String name)
     {
-        IUnboundedStreamSource<I> source   = getSource(inputType);
-        IUnboundedStreamExecutor  executor = configure(source);
+        S                        source   = getSource(inputType);
+        IUnboundedStreamExecutor executor = configure(source);
 
         return Pipeline.of(name,source,executor);
     }
 
-    protected abstract IUnboundedStreamSource<I>
+    protected abstract S
     getSource(Class<I> inputType);
 
     protected abstract IUnboundedStreamExecutor
-    configure(IUnboundedStreamSource<I> source);
+    configure(S source);
 }
 
 //////////////////////////////////////////////////////////////////////////////
