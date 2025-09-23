@@ -344,6 +344,25 @@ class BasicBoundedStream<T>
     public Stream<T>
     getImplementation() { return implementation; }
 
+    public List<T>
+    materialize()
+    {
+        try
+        {
+            List<T> materialized =
+                implementation
+                    .collect(Collectors.toCollection(ArrayList::new));
+
+            implementation = materialized.stream();
+            return materialized;
+        }
+        catch (Exception e)
+        {
+            implementation = Stream.empty();
+            return new ArrayList<>();
+        }
+    }
+
     public static <T> IBoundedStream<T>
     of(Stream<T> stream) { return new BasicBoundedStream<>(stream); }
 
@@ -363,20 +382,7 @@ class BasicBoundedStream<T>
     writeObject(ObjectOutputStream out)
         throws IOException
     {
-        List<T> materialized = null;
-
-        try
-        {
-            materialized = implementation.collect(Collectors.toList());
-            implementation = materialized.stream();
-        }
-        catch (Exception e)
-        {
-            materialized = new ArrayList<>();
-            implementation = Stream.empty();
-        }
-
-        out.writeObject(materialized);
+        out.writeObject(materialize());
     }
 
     @SuppressWarnings("unchecked")

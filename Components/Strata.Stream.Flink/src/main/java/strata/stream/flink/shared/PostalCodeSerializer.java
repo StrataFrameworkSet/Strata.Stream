@@ -23,7 +23,7 @@ class PostalCodeSerializer
 
     @Override
     public PostalCode
-    read(Kryo kryo,Input input,Class<? extends PostalCode> type)
+    read(Kryo kryo,Input input,Class<PostalCode> type)
     {
         return PostalCode.of(input.readString());
     }

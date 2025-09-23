@@ -23,7 +23,7 @@ class EmailAddressSerializer
 
     @Override
     public EmailAddress
-    read(Kryo kryo,Input input,Class<? extends EmailAddress> type)
+    read(Kryo kryo,Input input,Class<EmailAddress> type)
     {
         return EmailAddress.of(input.readString());
     }

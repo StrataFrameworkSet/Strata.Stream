@@ -23,7 +23,7 @@ class PhoneNumberSerializer
 
     @Override
     public PhoneNumber
-    read(Kryo kryo,Input input,Class<? extends PhoneNumber> type)
+    read(Kryo kryo,Input input,Class<PhoneNumber> type)
     {
         return PhoneNumber.of(input.readString());
     }

@@ -26,7 +26,7 @@ class SinkAdapter<T>
 
     @Override
     public SinkWriter<T>
-    createWriter(WriterInitContext context) throws IOException
+    createWriter(InitContext context) throws IOException
     {
         return new SinkWriterAdapter<>(sink);
     }

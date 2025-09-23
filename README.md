@@ -463,7 +463,7 @@ Strata.Stream/
 ## Requirements
 
 - Java 11 or later
-- Apache Flink 2.1.0 or later (for Flink integration)
+- Apache Flink 1.20.2 or later (for Flink integration)
 - Apache Kafka 3.9.1 or later (for Kafka integration)
 - Spring Boot 3.1.3 or later (for Spring integration)
 - Hibernate 5.6.11.Final or later (for persistence integration)

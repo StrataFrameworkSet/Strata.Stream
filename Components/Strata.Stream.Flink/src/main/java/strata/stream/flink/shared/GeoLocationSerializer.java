@@ -24,7 +24,7 @@ class GeoLocationSerializer
 
     @Override
     public GeoLocation
-    read(Kryo kryo,Input input,Class<? extends GeoLocation> type)
+    read(Kryo kryo,Input input,Class<GeoLocation> type)
     {
         return GeoLocation.of(input.readDouble(),input.readDouble());
     }

@@ -23,7 +23,7 @@ class PersonNameSerializer
 
     @Override
     public PersonName
-    read(Kryo kryo,Input input,Class<? extends PersonName> aClass)
+    read(Kryo kryo,Input input,Class<PersonName> aClass)
     {
         return fromString(input.readString());
     }

@@ -25,7 +25,7 @@ class PostalAddressSerializer
 
     @Override
     public PostalAddress
-    read(Kryo kryo,Input input,Class<? extends PostalAddress> type)
+    read(Kryo kryo,Input input,Class<PostalAddress> type)
     {
         return fromString(input.readString());
     }

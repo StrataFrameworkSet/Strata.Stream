@@ -5,14 +5,17 @@
 package strata.stream.flink.shared;
 
 import com.esotericsoftware.kryo.Serializer;
+import com.esotericsoftware.kryo.serializers.CollectionSerializer;
+import com.esotericsoftware.kryo.serializers.JavaSerializer;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.configuration.PipelineOptions;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import strata.foundation.core.value.*;
+import strata.stream.basic.bounded.BasicBoundedStream;
+import strata.stream.core.bounded.IBoundedStream;
 
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public
 class SerializationConfigurer
@@ -37,7 +40,9 @@ class SerializationConfigurer
                 EmailAddress.class,EmailAddressSerializer.class,
                 PostalAddress.class,PostalAddressSerializer.class,
                 PostalCode.class,PostalCodeSerializer.class,
-                GeoLocation.class,GeoLocationSerializer.class));
+                GeoLocation.class,GeoLocationSerializer.class,
+                ArrayList.class,CollectionSerializer.class,
+                LinkedList.class,CollectionSerializer.class));
     }
 
     public StreamExecutionEnvironment
@@ -48,8 +53,7 @@ class SerializationConfigurer
         configuration
             .set(
                 PipelineOptions.SERIALIZATION_CONFIG,
-                getSerializationConfiguration())
-            .set(PipelineOptions.FORCE_KRYO,true);
+                getSerializationConfiguration());
 
         environment.configure(configuration);
         return environment;
@@ -58,12 +62,16 @@ class SerializationConfigurer
     private <T> List<String>
     getSerializationConfiguration()
     {
-        return
+        List<String> configuration =
             registry
                 .entrySet()
                 .stream()
                 .map(e -> getConfigurationString(e.getKey(),e.getValue()))
-                .toList();
+                .collect(Collectors.toCollection(ArrayList::new));
+
+        configuration.add(getConfigurationString(IBoundedStream.class));
+        configuration.add(getConfigurationString(BasicBoundedStream.class));
+        return configuration;
     }
 
     private String
@@ -75,6 +83,18 @@ class SerializationConfigurer
                 type.getName(),
                 serializerType.getName());
     }
+
+
+    private String
+    getConfigurationString(Class<?> type)
+    {
+        return
+            String.format(
+                "%s: {type: kryo, kryo-type: registered, class: %s}",
+                type.getName(),
+                JavaSerializer.class.getName());
+    }
+
 }
 
 //////////////////////////////////////////////////////////////////////////////
