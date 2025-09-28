@@ -14,6 +14,8 @@ import strata.foundation.core.value.*;
 import strata.stream.basic.bounded.BasicBoundedStream;
 import strata.stream.core.bounded.IBoundedStream;
 
+import java.time.Duration;
+import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -71,7 +73,9 @@ class SerializationConfigurer
 
         configuration.add(getConfigurationString(IBoundedStream.class));
         configuration.add(getConfigurationString(BasicBoundedStream.class));
-        configuration.add(getConfigurationString(Optional.class));
+        configuration.add(getConfigurationString(Instant.class));
+        configuration.add(getConfigurationString(Duration.class));
+        configuration.add(getConfigurationStringOptional());
         return configuration;
     }
 
@@ -96,6 +100,15 @@ class SerializationConfigurer
                 JavaSerializer.class.getName());
     }
 
+    private String
+    getConfigurationStringOptional()
+    {
+        return
+            String.format(
+                "%s: {type: kryo, kryo-type: registered, class: %s}",
+                Optional.class.getName(),
+                OptionalSerializer.class.getName());
+    }
 }
 
 //////////////////////////////////////////////////////////////////////////////

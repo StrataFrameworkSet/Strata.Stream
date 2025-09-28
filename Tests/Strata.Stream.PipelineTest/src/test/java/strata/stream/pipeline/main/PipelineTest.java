@@ -19,7 +19,7 @@ import java.util.concurrent.TimeUnit;
 
 import static strata.foundation.core.concurrent.Awaiter.await;
 
-@Tag("IntegrationStage")
+@Tag("CommitStage")
 public
 class PipelineTest
 {
