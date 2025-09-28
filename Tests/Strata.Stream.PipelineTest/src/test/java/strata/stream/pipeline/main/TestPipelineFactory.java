@@ -15,6 +15,8 @@ import strata.stream.pipeline.enrichment.IInitialContextToStringContextEnricherM
 import strata.stream.pipeline.transformation.IToStringContextToUpperContextTransformerMapper;
 import strata.stream.pipeline.validation.IInitialContextSemanticValidatorFilter;
 import strata.stream.pipeline.validation.IInitialContextSyntacticValidatorFilter;
+import strata.stream.pipeline.validation.InitialContextSemanticValidatorFilter;
+import strata.stream.pipeline.validation.WithOptionalSemanticValidator;
 
 public
 class TestPipelineFactory
@@ -62,6 +64,7 @@ class TestPipelineFactory
                 .filter(syntactic)
                 .map(context -> logContext(context,"SyntacticValidation"))
                 .filter(semantic)
+                .filter(new InitialContextSemanticValidatorFilter(new WithOptionalSemanticValidator()))
                 .map(context -> logContext(context,"SemanticValidation"))
                 .map(enricher)
                 .map(context -> logContext(context,"Enrichment"))

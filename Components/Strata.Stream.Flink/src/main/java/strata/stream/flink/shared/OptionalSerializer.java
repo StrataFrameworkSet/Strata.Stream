@@ -9,34 +9,36 @@ import com.esotericsoftware.kryo.Serializer;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
 
-import java.io.Serializable;
 import java.util.Optional;
 
 public
-class OptionalSerializer<T extends Serializable>
-    extends Serializer<Optional<T>>
+class OptionalSerializer
+    extends Serializer<Optional<?>>
 {
     @Override
     public void
-    write(Kryo kryo,Output output,Optional<T> value)
+    write(Kryo kryo,Output output,Optional<?> value)
     {
-         kryo.writeObjectOrNull(
-            output,
-            value.orElse(null),
-            kryo.getSerializer(Object.class));
+        if (value.isPresent())
+        {
+            output.writeBoolean(true);
+            Object object = value.get();
+            kryo.writeClassAndObject(output,object);
+        }
+        else
+            output.writeBoolean(false);
     }
 
-    @SuppressWarnings("unchecked")
     @Override
-    public Optional<T>
-    read(Kryo kryo,Input input,Class<Optional<T>> type)
+    public Optional<?>
+    read(Kryo kryo,Input input,Class<Optional<?>> type)
     {
+        boolean isPresent = input.readBoolean();
+
         return
-            Optional.ofNullable(
-                (T)kryo.readObjectOrNull(
-                    input,
-                    Object.class,
-                    kryo.getSerializer(Object.class)));
+            isPresent
+                ? Optional.ofNullable(kryo.readClassAndObject(input))
+                : Optional.empty();
     }
 }
 

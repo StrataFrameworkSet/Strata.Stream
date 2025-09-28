@@ -5,12 +5,18 @@
 package strata.stream.flink.shared;
 
 import com.esotericsoftware.kryo.Serializer;
+import com.esotericsoftware.kryo.serializers.JavaSerializer;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import strata.foundation.core.value.*;
+import strata.stream.basic.bounded.BasicBoundedStream;
+import strata.stream.core.bounded.IBoundedStream;
 
+import java.time.Duration;
+import java.time.Instant;
 import java.util.Map;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -50,6 +56,22 @@ class SerializationConfigurerTest
         assertEquals(
             PostalAddressSerializer.class,
             registeredTypes.get(PostalAddress.class));
+        assertEquals(
+            JavaSerializer.class,
+            registeredTypes.get(IBoundedStream.class));
+        assertEquals(
+            JavaSerializer.class,
+            registeredTypes.get(BasicBoundedStream.class));
+        assertEquals(
+            JavaSerializer.class,
+            registeredTypes.get(Instant.class));
+        assertEquals(
+            JavaSerializer.class,
+            registeredTypes.get(Duration.class));
+        assertEquals(
+            OptionalSerializer.class,
+            registeredTypes.get(Optional.class));
+
         /*
         assertTrue(
             environment
