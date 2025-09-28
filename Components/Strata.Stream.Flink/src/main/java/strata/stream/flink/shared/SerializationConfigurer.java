@@ -71,6 +71,7 @@ class SerializationConfigurer
 
         configuration.add(getConfigurationString(IBoundedStream.class));
         configuration.add(getConfigurationString(BasicBoundedStream.class));
+        configuration.add(getConfigurationString(Optional.class));
         return configuration;
     }
 
