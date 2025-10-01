@@ -13,10 +13,7 @@ import strata.stream.pipeline.context.ToStringContext;
 import strata.stream.pipeline.context.ToUpperContext;
 import strata.stream.pipeline.enrichment.IInitialContextToStringContextEnricherMapper;
 import strata.stream.pipeline.transformation.IToStringContextToUpperContextTransformerMapper;
-import strata.stream.pipeline.validation.IInitialContextSemanticValidatorFilter;
-import strata.stream.pipeline.validation.IInitialContextSyntacticValidatorFilter;
-import strata.stream.pipeline.validation.InitialContextSemanticValidatorFilter;
-import strata.stream.pipeline.validation.WithOptionalSemanticValidator;
+import strata.stream.pipeline.validation.*;
 
 public
 class TestPipelineFactory
@@ -49,7 +46,7 @@ class TestPipelineFactory
         return
             new FromDataUnboundedStreamSource<>(
                 inputType,
-                -5L,-4L,-3L,-2L,-1L,0L,1L,2L,3L,4L,5L);
+                -5L,-4L,-3L,-2L,-1L,0L,1L,2L,3L,4L,5L,11L,12L,13L,14L,15L);
     }
 
     @Override
@@ -64,7 +61,14 @@ class TestPipelineFactory
                 .filter(syntactic)
                 .map(context -> logContext(context,"SyntacticValidation"))
                 .filter(semantic)
-                .filter(new InitialContextSemanticValidatorFilter(new WithOptionalSemanticValidator()))
+                .filter(
+                    new InitialContextValidatorFilter(
+                        "CheckLimit",
+                        new OptionalLimitValidator(10L)))
+                .filter(
+                    new InitialContextValidatorFilter(
+                        "CheckNoLimit",
+                        new OptionalLimitValidator()))
                 .map(context -> logContext(context,"SemanticValidation"))
                 .map(enricher)
                 .map(context -> logContext(context,"Enrichment"))
