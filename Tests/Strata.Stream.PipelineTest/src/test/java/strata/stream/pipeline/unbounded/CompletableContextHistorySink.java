@@ -12,6 +12,8 @@ import strata.stream.pipeline.concurrent.ICompletableContext;
 import strata.stream.pipeline.context.IPipelineContext;
 import strata.stream.pipeline.context.PipelineStep;
 
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 import java.util.stream.Collectors;
 
 public
@@ -32,7 +34,7 @@ class CompletableContextHistorySink
     }
 
     @Override
-    protected ICompletableContext<String>
+    protected CompletionStage<ICompletableContext<String>>
     doProcess(ICompletableContext<String> context)
     {
         if (context instanceof IPipelineContext<String> pipeline)
@@ -49,7 +51,7 @@ class CompletableContextHistorySink
         else
             System.out.println(String.format("Context: %s",context.getId()));
 
-        return context;
+        return CompletableFuture.completedFuture(context);
     }
 }
 
