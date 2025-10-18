@@ -101,6 +101,15 @@ Pipeline processing component providing advanced workflow and context management
   - PipelineStep for individual step tracking and status
   - StepStatus enumeration for step lifecycle states
   - IPipelineContextFactory for context creation
+- `strata.stream.pipeline.concurrent` - Asynchronous pipeline processing
+  - ICompletableContext for asynchronous context operations with CompletionStage integration
+  - AbstractCompletableContext base implementation for async contexts
+  - CompletableStreamStage for managing asynchronous stream stages with filter, map, and flatMap operations
+  - CompletableUnboundedStreamExecutor for executing unbounded streams with async processing
+  - CompletableStreamExecution for tracking async stream execution state
+  - CompletableExecutionResult for async execution results
+  - ICompletableStreamAwaiter for awaiting completion of multiple async stages
+  - CompletableStreamAwaiter implementation for coordinating async operations
 - `strata.stream.pipeline.transformation` - Data transformation utilities
   - ITransformer and ITransformerMapper for data transformations
   - TransformerMapper implementation for mapping operations
@@ -374,6 +383,128 @@ IEnricherMapper<ToStringContext, EnrichedContext> enricher =
 // Apply enrichment to pipeline context
 ToStringContext context = new ToStringContext("Original Value", List.of());
 EnrichedContext enriched = enricher.enrich(context);
+```
+
+#### Asynchronous Pipeline Processing
+
+```java
+import strata.foundation.core.concurrent.CompletionStageMap;
+import strata.stream.core.shared.IExecutor;
+import strata.stream.core.shared.SuppliedExecutor;
+import strata.stream.core.unbounded.IUnboundedStreamExecutor;
+import strata.stream.core.unbounded.IUnboundedStreamSource;
+import strata.stream.pipeline.concurrent.*;
+import strata.stream.pipeline.context.PipelineContext;
+import strata.stream.pipeline.enrichment.CompletableEnricherMapper;
+import strata.stream.pipeline.enrichment.StringBangCompletableEnricher;
+import strata.stream.pipeline.main.AbstractPipelineFactory;
+import strata.stream.pipeline.main.IPipeline;
+import strata.stream.pipeline.main.IPipelineFactory;
+import strata.stream.pipeline.transformation.CompletableTransformerMapper;
+import strata.stream.pipeline.transformation.LongToStringCompletableTransformer;
+import strata.stream.pipeline.validation.CompletableValidatorFilter;
+import strata.stream.pipeline.validation.GreaterThanZeroCompletableValidator;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+
+// Create a completable pipeline factory extending AbstractPipelineFactory
+public class CompletablePipelineFactory 
+    extends AbstractPipelineFactory<Long, IUnboundedStreamSource<Long>>
+    implements IPipelineFactory<Long>
+{
+    private final CompletionStageMap<String, ICompletableContext<String>> pending;
+    private final IExecutor executor;
+    
+    public CompletablePipelineFactory() {
+        pending = new CompletionStageMap<>();
+        executor = SuppliedExecutor.of(() -> Executors.newCachedThreadPool());
+    }
+    
+    // Implement getSource to provide the data source
+    @Override
+    protected IUnboundedStreamSource<Long> getSource(Class<Long> inputType) {
+        return new FromDataUnboundedStreamSource<>(
+            inputType,
+            -5L, -4L, -3L, -2L, -1L, 0L, 1L, 2L, 3L, 4L, 5L, 11L, 12L, 13L, 14L, 15L);
+    }
+    
+    // Implement configure to build the async pipeline
+    @Override
+    protected IUnboundedStreamExecutor configure(IUnboundedStreamSource<Long> source) {
+        return CompletableUnboundedStreamExecutor.of(
+            source
+                // Step 1: Create async pipeline contexts from input values
+                .map(value -> 
+                    CompletableStreamStage.of(
+                        () -> PipelineContext.of(value), 
+                        executor))
+                
+                // Step 2: Async validation - filter values greater than zero
+                .map(CompletableValidatorFilter.of(
+                    "Long>0",
+                    GreaterThanZeroCompletableValidator.of(executor)))
+                
+                // Step 3: Async transformation - convert Long to String
+                .map(CompletableTransformerMapper.of(
+                    "LongToString",
+                    LongToStringCompletableTransformer.of(executor)))
+                
+                // Step 4: Async enrichment - append exclamation mark
+                .map(CompletableEnricherMapper.of(
+                    "String!",
+                    StringBangCompletableEnricher.of(executor)))
+                
+                // Step 5: Log results (custom logger)
+                .map(new CompletableStringLogger())
+                
+                // Step 6: Collect and await all async stages
+                .map(CompletableStreamAwaiter.of(pending)),
+            pending);
+    }
+}
+
+// Usage example
+public static void main(String[] args) throws Exception {
+    // Create the factory
+    IPipelineFactory<Long> factory = new CompletablePipelineFactory();
+    
+    // Create the pipeline with a name
+    IPipeline<Long> pipeline = factory.create(Long.class, "CompletablePipeline");
+    
+    // Execute the pipeline
+    CompletionStage<IStreamExecution> execution = pipeline.execute();
+    
+    // Process results asynchronously
+    await(
+        execution
+            .thenApply(exec -> logExecutionStatus(exec))
+            .thenAccept(exec -> logExecutionResults(exec)));
+}
+
+private static IStreamExecution logExecutionStatus(IStreamExecution execution) {
+    System.out.println("Status = " + await(execution.getStatus()));
+    return execution;
+}
+
+private static void logExecutionResults(IStreamExecution execution) {
+    IExecutionResult result = await(execution.getResult());
+    
+    if (result instanceof CompletableExecutionResult<?> completable) {
+        // Access all completed async operations
+        completable.getCompleted().entrySet().forEach(entry ->
+            System.out.println("Result [" + entry.getKey() + "] = " + entry.getValue()));
+        
+        // Log execution duration
+        System.out.println("Duration(ms) = " + 
+            result.getExecutionDurationIn(TimeUnit.MILLISECONDS).toMillis());
+    }
+}
+
+// Output will show:
+// - Only positive values (1, 2, 3, 4, 5, 11, 12, 13, 14, 15) pass validation
+// - Each value transformed to string with "!" appended
+// - All operations executed asynchronously
+// - Results collected with execution timing
 ```
 
 ### Flink Integration Examples

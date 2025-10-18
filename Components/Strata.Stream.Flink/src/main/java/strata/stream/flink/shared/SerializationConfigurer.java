@@ -13,10 +13,12 @@ import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import strata.foundation.core.value.*;
 import strata.stream.basic.bounded.BasicBoundedStream;
 import strata.stream.core.bounded.IBoundedStream;
+import strata.stream.core.shared.SuppliedExecutor;
 
 import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 public
@@ -75,7 +77,9 @@ class SerializationConfigurer
         configuration.add(getConfigurationString(BasicBoundedStream.class));
         configuration.add(getConfigurationString(Instant.class));
         configuration.add(getConfigurationString(Duration.class));
+        configuration.add(getConfigurationString(SuppliedExecutor.class));
         configuration.add(getConfigurationStringOptional());
+        configuration.add(getConfigurationStringCompletableFuture());
         return configuration;
     }
 
@@ -109,6 +113,18 @@ class SerializationConfigurer
                 Optional.class.getName(),
                 OptionalSerializer.class.getName());
     }
+
+
+    private String
+    getConfigurationStringCompletableFuture()
+    {
+        return
+            String.format(
+                "%s: {type: kryo, kryo-type: registered, class: %s}",
+                CompletableFuture.class.getName(),
+                CompletableFutureSerializer.class.getName());
+    }
+
 }
 
 //////////////////////////////////////////////////////////////////////////////

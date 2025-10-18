@@ -5,8 +5,11 @@
 package strata.stream.pipeline.context;
 
 import strata.foundation.core.utility.Conditional;
+import strata.stream.core.shared.IFunction;
+import strata.stream.pipeline.concurrent.ICompletableContext;
 import strata.stream.pipeline.shared.PipelineException;
 
+import java.io.Serializable;
 import java.util.List;
 
 public
@@ -24,6 +27,19 @@ class ToStringContext
     ToStringContext(String value,List<PipelineStep> previousSteps)
     {
         super("ToString",value,previousSteps);
+    }
+
+    public
+    ToStringContext(String value,InitialContext previous)
+    {
+        super("ToString",value,previous);
+    }
+
+    @Override
+    public <R extends Serializable> ICompletableContext<R>
+    mapValue(IFunction<String,R> mapper)
+    {
+        return PipelineContext.of(mapper.apply(getValue()),this);
     }
 
     @Override

@@ -1,4 +1,4 @@
-/// ///////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
 // AbstractPipelineContext.java
 //////////////////////////////////////////////////////////////////////////////
 
@@ -7,6 +7,8 @@ package strata.stream.pipeline.context;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import strata.foundation.core.utility.Conditional;
+import strata.foundation.core.utility.ExtendedOptional;
+import strata.stream.pipeline.concurrent.AbstractCompletableContext;
 import strata.stream.pipeline.shared.PipelineException;
 
 import java.io.Serializable;
@@ -17,12 +19,12 @@ import java.util.Optional;
 
 public abstract
 class AbstractPipelineContext<T extends Serializable>
+    extends AbstractCompletableContext<T>
     implements IPipelineContext<T>
 {
-    private String                   stepPrefix;
-    private T                        value;
-    private final List<PipelineStep> previousSteps;
-    private Optional<PipelineStep>   currentStep;
+    private String                         stepPrefix;
+    private final List<PipelineStep>       previousSteps;
+    private ExtendedOptional<PipelineStep> currentStep;
 
     @SuppressWarnings("unchecked")
     protected
@@ -43,10 +45,10 @@ class AbstractPipelineContext<T extends Serializable>
         T                  value,
         List<PipelineStep> previousSteps)
     {
+        super(value);
         this.stepPrefix = stepPrefix;
-        this.value = value;
         this.previousSteps = new ArrayList<>(previousSteps);
-        this.currentStep = Optional.empty();
+        this.currentStep = ExtendedOptional.empty();
     }
 
     protected
@@ -55,10 +57,49 @@ class AbstractPipelineContext<T extends Serializable>
         PipelineException  exception,
         List<PipelineStep> previousSteps)
     {
+        super(null);
         this.stepPrefix = stepPrefix;
-        this.value = null;
         this.previousSteps = new ArrayList<>(previousSteps);
-        this.currentStep = Optional.of(PipelineStep.of(this,stepPrefix,exception));
+        this.currentStep = ExtendedOptional.of(PipelineStep.of(this,stepPrefix,exception));
+    }
+
+    protected
+    AbstractPipelineContext(
+        String              stepPrefix,
+        T                   value,
+        IPipelineContext<?> previous)
+    {
+        super(value,previous);
+        this.stepPrefix = stepPrefix;
+        this.previousSteps = new ArrayList<>(previous.getAccumulatedSteps());
+        this.currentStep = ExtendedOptional.empty();
+    }
+
+    protected
+    AbstractPipelineContext(
+        String              stepPrefix,
+        PipelineException   exception,
+        IPipelineContext<?> previous)
+    {
+        super(null,previous);
+        this.stepPrefix = stepPrefix;
+        this.previousSteps = new ArrayList<>(previous.getAccumulatedSteps());
+        this.currentStep = ExtendedOptional.of(PipelineStep.of(this,stepPrefix,exception));
+    }
+
+    @Override
+    public IPipelineContext<T>
+    filterOut()
+    {
+        return (IPipelineContext<T>)super.filterOut();
+    }
+
+    @Override
+    public IPipelineContext<T>
+    setStepPrefix(String stepPrefix)
+    {
+        this.stepPrefix = stepPrefix;
+        return this;
     }
 
     @Override
@@ -66,7 +107,7 @@ class AbstractPipelineContext<T extends Serializable>
     startStep(String step) throws IllegalStateException
     {
         currentStep.ifPresent(current -> throwCurrentStepExistsException(current));
-        currentStep = Optional.of(new PipelineStep(this,stepPrefix + step));
+        currentStep = ExtendedOptional.of(new PipelineStep(this,stepPrefix + step));
         getCurrentStep()
             .ifPresentOrElse(current ->
                 getLogger().info("Starting step {}.",current.getName()),
@@ -88,7 +129,7 @@ class AbstractPipelineContext<T extends Serializable>
                 getLogger().info("Completed step {}.",current.getName());
                 complete(current);
                 notifyCompleted(current);
-                currentStep = Optional.empty();
+                currentStep = ExtendedOptional.empty();
                 break;
 
             case COMPLETED:
@@ -130,7 +171,7 @@ class AbstractPipelineContext<T extends Serializable>
                         exception.getClass().getSimpleName()));
                 completeWith(current,exception);
                 notifyCompleted(current);
-                currentStep = Optional.empty();
+                currentStep = ExtendedOptional.empty();
                 break;
 
             case COMPLETED_WITH_EXCEPTION:
@@ -178,7 +219,7 @@ class AbstractPipelineContext<T extends Serializable>
                         exception.getClass().getSimpleName()));
                 failWith(current,exception);
                 notifyFailed(current);
-                currentStep = Optional.empty();
+                currentStep = ExtendedOptional.empty();
                 break;
 
             case FAILED:
@@ -207,16 +248,7 @@ class AbstractPipelineContext<T extends Serializable>
     public Optional<PipelineStep>
     getCurrentStep()
     {
-        return currentStep;
-    }
-
-    @Override
-    public T
-    getValue()
-        throws NullPointerException
-    {
-        Objects.requireNonNull(value,"No value available");
-        return value;
+        return currentStep.toOptional();
     }
 
     @Override
@@ -246,12 +278,6 @@ class AbstractPipelineContext<T extends Serializable>
     isRecoverable(PipelineException exception)
     {
         return false;
-    }
-
-    protected void
-    setValue(T value)
-    {
-        this.value = value;
     }
 
     protected Logger

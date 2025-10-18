@@ -1,4 +1,4 @@
-/// ///////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
 // PipelineContextFactoryTest.java
 //////////////////////////////////////////////////////////////////////////////
 
@@ -7,8 +7,7 @@ package strata.stream.pipeline.context;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 
 @Tag("CommitStage")
 public
@@ -64,9 +63,8 @@ class PipelineContextFactoryTest
         ToUpperContext toUpper =
             new ToUpperContextFactory().create(toString,new TestException());
 
-        assertThrows(
-            NullPointerException.class,
-            () -> toString.getValue());
+        assertFalse(toString.hasValue());
+        assertNull(toString.getValue());
         assertEquals(2,toString.getAccumulatedSteps().size());
         assertEquals(
             StepStatus.FAILED,
@@ -75,9 +73,8 @@ class PipelineContextFactoryTest
                 .getLast()
                 .getStatus());
 
-        assertThrows(
-            NullPointerException.class,
-            () -> toUpper.getValue());
+        assertFalse(toUpper.hasValue());
+        assertNull(toUpper.getValue());
         assertEquals(3,toUpper.getAccumulatedSteps().size());
         assertEquals(
             StepStatus.FAILED,

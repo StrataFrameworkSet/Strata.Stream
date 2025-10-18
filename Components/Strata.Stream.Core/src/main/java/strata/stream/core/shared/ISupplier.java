@@ -1,15 +1,14 @@
 /// ///////////////////////////////////////////////////////////////////////////
-// IBoundedStreamable.java
+// ISupplier.java
 //////////////////////////////////////////////////////////////////////////////
 
-package strata.stream.core.bounded;
+package strata.stream.core.shared;
 
-import strata.stream.core.shared.IStreamable;
+import java.io.Serializable;
+import java.util.function.Supplier;
 
 public
-interface IBoundedStreamable
-    extends IStreamable
-{
-}
+interface ISupplier<T>
+    extends Supplier<T>, Serializable {}
 
 //////////////////////////////////////////////////////////////////////////////

@@ -5,9 +5,12 @@
 package strata.stream.pipeline.context;
 
 import strata.foundation.core.utility.Conditional;
+import strata.stream.core.shared.IFunction;
+import strata.stream.pipeline.concurrent.ICompletableContext;
 import strata.stream.pipeline.shared.PipelineException;
 import strata.stream.pipeline.validation.SyntacticValidationFailedException;
 
+import java.io.Serializable;
 import java.util.List;
 
 public
@@ -19,6 +22,13 @@ class ToUpperContext
     ToUpperContext(PipelineException exception,List<PipelineStep> previousSteps)
     {
         super("ToUpper",exception,previousSteps);
+    }
+
+    @Override
+    public <R extends Serializable> ICompletableContext<R>
+    mapValue(IFunction<String,R> mapper)
+    {
+        return PipelineContext.of(mapper.apply(getValue()),this);
     }
 
     public

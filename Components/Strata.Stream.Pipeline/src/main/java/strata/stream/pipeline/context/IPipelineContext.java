@@ -1,10 +1,11 @@
-/// ///////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
 // IPipelineContext.java
 //////////////////////////////////////////////////////////////////////////////
 
 package strata.stream.pipeline.context;
 
 import strata.foundation.core.utility.Conditional;
+import strata.stream.pipeline.concurrent.ICompletableContext;
 import strata.stream.pipeline.shared.PipelineException;
 
 import java.io.Serializable;
@@ -13,8 +14,15 @@ import java.util.Optional;
 
 public
 interface IPipelineContext<T extends Serializable>
-    extends Serializable
+    extends ICompletableContext<T>
 {
+    @Override
+    IPipelineContext<T>
+    filterOut();
+
+    IPipelineContext<T>
+    setStepPrefix(String prefix);
+
     IPipelineContext<T>
     startStep(String step) throws IllegalStateException;
 
@@ -29,9 +37,6 @@ interface IPipelineContext<T extends Serializable>
 
     Conditional
     recover(PipelineException exception);
-
-    T
-    getValue() throws NullPointerException;
 
     Optional<PipelineStep>
     getCurrentStep();

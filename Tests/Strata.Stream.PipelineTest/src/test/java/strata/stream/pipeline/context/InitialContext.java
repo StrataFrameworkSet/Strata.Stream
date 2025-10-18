@@ -1,10 +1,13 @@
-/// ///////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
 // InitialContext.java
 //////////////////////////////////////////////////////////////////////////////
 
 package strata.stream.pipeline.context;
 
+import strata.stream.core.shared.IFunction;
 import strata.stream.pipeline.shared.PipelineException;
+
+import java.io.Serializable;
 
 public
 class InitialContext
@@ -15,6 +18,13 @@ class InitialContext
     InitialContext(Long value)
     {
         super("Initial",value);
+    }
+
+    @Override
+    public <R extends Serializable> IPipelineContext<R>
+    mapValue(IFunction<Long,R> mapper)
+    {
+        return PipelineContext.of(mapper.apply(getValue()),this);
     }
 
     @Override
