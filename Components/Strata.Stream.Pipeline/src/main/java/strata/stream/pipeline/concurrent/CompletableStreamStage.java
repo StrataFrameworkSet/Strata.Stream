@@ -8,10 +8,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import strata.foundation.core.utility.DefaultIdentifierGenerator;
 import strata.foundation.core.utility.IIdentifierGenerator;
-import strata.stream.core.shared.IExecutor;
-import strata.stream.core.shared.IFunction;
-import strata.stream.core.shared.IPredicate;
-import strata.stream.core.shared.ISupplier;
+import strata.stream.core.shared.*;
 
 import java.io.*;
 import java.util.List;
@@ -157,6 +154,14 @@ class CompletableStreamStage<T extends Serializable>
                 this);
     }
 
+    public CompletionStage<Void>
+    thenAccept(IConsumer<ICompletableContext<T>> consumer)
+    {
+        getLogger().debug("thenAccept({})",consumer);
+
+        return context.thenAccept(c -> doAccept(c,consumer));
+    }
+
     public CompletableStreamStage<T>
     join()
     {
@@ -243,6 +248,18 @@ class CompletableStreamStage<T extends Serializable>
                         .spliterator(),false)
                 .map(value -> source.mapValue(v -> value))
                 .toList();
+    }
+
+    private void
+    doAccept(ICompletableContext<T> source,IConsumer<ICompletableContext<T>> consumer)
+    {
+        if (source.isFilteredOut())
+        {
+            getLogger().debug("doAccept: source is filtered out");
+            return;
+        }
+
+        consumer.accept(source);
     }
 
     @Serial

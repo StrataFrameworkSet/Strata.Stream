@@ -16,6 +16,8 @@ import strata.stream.pipeline.concurrent.ICompletableContext;
 import strata.stream.pipeline.context.PipelineContext;
 import strata.stream.pipeline.enrichment.CompletableEnricherMapper;
 import strata.stream.pipeline.enrichment.StringBangCompletableEnricher;
+import strata.stream.pipeline.shared.CompletableContextHistoryLogger;
+import strata.stream.pipeline.shared.CompletableStreamConsumer;
 import strata.stream.pipeline.shared.CompletableStringLogger;
 import strata.stream.pipeline.transformation.CompletableTransformerMapper;
 import strata.stream.pipeline.transformation.LongToStringCompletableTransformer;
@@ -62,7 +64,7 @@ class CompletablePipelineFactory
                     .map(
                         i ->
                             CompletableStreamStage.of(
-                                () -> PipelineContext.of(i),executor))
+                                () -> PipelineContext.of("Test",i),executor))
                     .map(
                         CompletableValidatorFilter.of(
                             "Long>0",
@@ -76,7 +78,8 @@ class CompletablePipelineFactory
                             "String!",
                             StringBangCompletableEnricher.of(executor)))
                     .map(new CompletableStringLogger())
-                    .map(CompletableStreamAwaiter.of(pending)),
+                    .map(CompletableStreamAwaiter.of(pending))
+                    .forEach(CompletableStreamConsumer.of(new CompletableContextHistoryLogger())),
                 pending);
     }
 }

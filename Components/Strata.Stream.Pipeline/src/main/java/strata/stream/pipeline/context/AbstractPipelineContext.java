@@ -245,6 +245,10 @@ class AbstractPipelineContext<T extends Serializable>
     }
 
     @Override
+    public String
+    getStepPrefix() { return stepPrefix; }
+
+    @Override
     public Optional<PipelineStep>
     getCurrentStep()
     {

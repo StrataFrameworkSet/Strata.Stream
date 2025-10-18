@@ -38,6 +38,9 @@ interface IPipelineContext<T extends Serializable>
     Conditional
     recover(PipelineException exception);
 
+    String
+    getStepPrefix();
+
     Optional<PipelineStep>
     getCurrentStep();
 

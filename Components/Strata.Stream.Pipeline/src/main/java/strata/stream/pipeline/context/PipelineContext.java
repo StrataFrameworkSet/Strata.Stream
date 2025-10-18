@@ -22,7 +22,7 @@ class PipelineContext<T extends Serializable>
     public
     PipelineContext(T value,IPipelineContext<?> previous)
     {
-        super("PipelineStep",value,previous);
+        super(previous.getStepPrefix(),value,previous);
     }
 
     public
