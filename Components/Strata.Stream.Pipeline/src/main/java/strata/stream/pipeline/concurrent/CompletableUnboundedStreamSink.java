@@ -30,6 +30,9 @@ class CompletableUnboundedStreamSink<T extends Serializable,R extends Serializab
         stream.forEach(stage -> process(stage));
     }
 
+    public CompletionStageMap<String,ICompletableContext<R>>
+    getPending() { return pending; }
+
     protected void
     process(CompletableStreamStage<T> stage)
     {
