@@ -4,6 +4,8 @@
 
 package strata.stream.pipeline.concurrent;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import strata.foundation.core.utility.DefaultIdentifierGenerator;
 import strata.foundation.core.utility.IIdentifierGenerator;
 import strata.stream.core.shared.IExecutor;
@@ -11,10 +13,7 @@ import strata.stream.core.shared.IFunction;
 import strata.stream.core.shared.IPredicate;
 import strata.stream.core.shared.ISupplier;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.Serializable;
+import java.io.*;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
@@ -107,6 +106,7 @@ class CompletableStreamStage<T extends Serializable>
     public CompletableStreamStage<T>
     filter(IPredicate<T> predicate)
     {
+        getLogger().debug("filter({})",predicate);
         return
             CompletableStreamStage.of(
                 context.thenApply(context -> doFilter(context,predicate)),
@@ -116,6 +116,7 @@ class CompletableStreamStage<T extends Serializable>
     public <R extends Serializable> CompletableStreamStage<R>
     map(IFunction<T,R> mapper)
     {
+        getLogger().debug("map({})",mapper);
         return
             CompletableStreamStage.of(
                 context.thenApply(context -> doMap(context,mapper)),
@@ -125,6 +126,7 @@ class CompletableStreamStage<T extends Serializable>
     public <R extends Serializable> List<CompletableStreamStage<R>>
     flatMap(IFunction<T,Iterable<R>> mapper)
     {
+        getLogger().debug("flatMap({})",mapper);
         return
             await(context.thenApply(c -> doFlatMap(c,mapper)))
                 .stream()
@@ -135,6 +137,7 @@ class CompletableStreamStage<T extends Serializable>
     public <U extends Serializable> CompletableStreamStage<U>
     thenApply(IFunction<ICompletableContext<T>,ICompletableContext<U>> function)
     {
+        getLogger().debug("thenApply({})",function);
         return
             CompletableStreamStage.of(
                 context.thenApply(function::apply),
@@ -147,6 +150,7 @@ class CompletableStreamStage<T extends Serializable>
             ICompletableContext<T>,
             CompletionStage<ICompletableContext<U>>> function)
     {
+        getLogger().debug("thenCompose({})",function);
         return
             CompletableStreamStage.of(
                 context.thenCompose(function::apply),
@@ -156,6 +160,7 @@ class CompletableStreamStage<T extends Serializable>
     public CompletableStreamStage<T>
     join()
     {
+        getLogger().debug("join()");
         context
             .toCompletableFuture()
             .join();
@@ -191,7 +196,10 @@ class CompletableStreamStage<T extends Serializable>
     doFilter(ICompletableContext<T> source,IPredicate<T> predicate)
     {
         if (source.isFilteredOut())
+        {
+            getLogger().debug("doFilter: source is filtered out");
             return source;
+        }
 
         return
             predicate.test(source.getValue())
@@ -203,10 +211,13 @@ class CompletableStreamStage<T extends Serializable>
     doMap(ICompletableContext<T> source,IFunction<T,R> mapper)
     {
         if (source.isFilteredOut())
+        {
+            getLogger().debug("doMap: source is filtered out");
             return
                 source
                     .mapValue(v -> (R)null)
                     .filterOut();
+        }
 
         return source.mapValue(mapper);
     }
@@ -215,11 +226,14 @@ class CompletableStreamStage<T extends Serializable>
     doFlatMap(ICompletableContext<T> source,IFunction<T,Iterable<R>> mapper)
     {
         if (source.isFilteredOut())
+        {
+            getLogger().debug("doFlatMap: source is filtered out");
             return
                 List.of(
                     source
                         .mapValue(v -> (R)null)
                         .filterOut());
+        }
 
         return
             StreamSupport
@@ -231,15 +245,19 @@ class CompletableStreamStage<T extends Serializable>
                 .toList();
     }
 
+    @Serial
     private void
     writeObject(ObjectOutputStream out)
         throws IOException
     {
+        getLogger().debug("writeObject({})",key);
         out.writeObject(key);
         out.writeObject(context.toCompletableFuture().join());
         out.writeObject(executor);
     }
 
+    @Serial
+    @SuppressWarnings("unchecked")
     private void
     readObject(ObjectInputStream in)
         throws IOException, ClassNotFoundException
@@ -247,7 +265,12 @@ class CompletableStreamStage<T extends Serializable>
         key = (String)in.readObject();
         context = CompletableFuture.completedFuture((ICompletableContext<T>)in.readObject());
         executor =  (IExecutor)in.readObject();
+        getLogger().debug("readObject({})",key);
     }
+
+    private Logger
+    getLogger() { return LogManager.getLogger(getClass()); }
+
 }
 
 //////////////////////////////////////////////////////////////////////////////
