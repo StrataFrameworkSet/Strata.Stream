@@ -10,6 +10,7 @@ import strata.stream.pipeline.context.IPipelineContext;
 
 import java.io.Serializable;
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 
 public
@@ -42,6 +43,9 @@ class CompletableValidatorFilter<T extends Serializable>
     private CompletionStage<ICompletableContext<T>>
     doValidate(ICompletableContext<T> context)
     {
+        if (context.isFilteredOut())
+            return CompletableFuture.completedFuture(context);
+
         if (!(context instanceof IPipelineContext<T> pipeline))
             throw new IllegalStateException(
                 "CompletableValidatorFilter requires IPipelineContext<T>");

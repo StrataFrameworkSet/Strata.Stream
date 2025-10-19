@@ -9,6 +9,7 @@ import strata.stream.core.unbounded.AbstractUnboundedStreamSink;
 import strata.stream.core.unbounded.IUnboundedStream;
 
 import java.io.Serializable;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 
 public abstract
@@ -37,9 +38,20 @@ class CompletableUnboundedStreamSink<T extends Serializable,R extends Serializab
     process(CompletableStreamStage<T> stage)
     {
         CompletableStreamStage<R> sunkStage =
-            stage.thenCompose(this::doProcess);
+            stage.thenCompose(this::doProcessIfNotFilteredOut);
 
         pending.put(sunkStage.getKey(),sunkStage.getContext());
+    }
+
+    protected CompletionStage<ICompletableContext<R>>
+    doProcessIfNotFilteredOut(ICompletableContext<T> context)
+    {
+        if (context.isFilteredOut())
+            return
+                CompletableFuture.completedFuture(
+                    context.mapValue(input -> null));
+
+            return doProcess(context);
     }
 
     protected abstract CompletionStage<ICompletableContext<R>>
