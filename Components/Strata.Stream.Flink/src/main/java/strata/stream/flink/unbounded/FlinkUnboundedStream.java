@@ -10,6 +10,7 @@ import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.windowing.assigners.TumblingEventTimeWindows;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import strata.foundation.core.collection.Pair;
 import strata.stream.core.shared.*;
 import strata.stream.core.unbounded.*;
 
@@ -40,10 +41,44 @@ class FlinkUnboundedStream<T>
     }
 
     @Override
-    public ITimeWindowedUnboundedStream<T>
-    windowBy(TimeAmount window)
+    public IWindowedUnboundedStream<T>
+    windowBy(WindowPlan plan)
     {
-        logger.debug("windowBy({})",window);
+        logger.debug("windowBy({})",plan);
+        Duration duration = null;
+        Integer  count    = null;
+
+        if (plan.isPrimary(Duration.class))
+        {
+            Pair<Duration,Integer> pair = plan.getDurationOrCount();
+
+            duration = pair.getFirst();
+            count = pair.getSecond();
+        }
+        else if (plan.isPrimary(Integer.class))
+        {
+            Pair<Integer,Duration> pair = plan.getCountOrDuration();
+
+            count = pair.getFirst();
+            duration = pair.getSecond();
+        }
+
+        return
+            new FlinkTimeWindowedUnboundedStream<>(
+                implementation
+                    .assignTimestampsAndWatermarks(
+                        WatermarkStrategy
+                            .<T>forMonotonousTimestamps()
+                            .withTimestampAssigner(new TimestampAssigner<>()))
+                    .windowAll(TumblingEventTimeWindows.of(duration))
+                    .trigger(DurationLimitedCountTrigger.of(count)));
+    }
+
+    @Override
+    public IWindowedUnboundedStream<T>
+    windowBy(Duration duration)
+    {
+        logger.debug("windowBy({})",duration);
         return
             new FlinkTimeWindowedUnboundedStream<>(
                 implementation
@@ -52,7 +87,18 @@ class FlinkUnboundedStream<T>
                             .<T>forMonotonousTimestamps()
                             .withTimestampAssigner(new TimestampAssigner<>()))
                     .windowAll(
-                        TumblingEventTimeWindows.of(toDuration(window))));
+                        TumblingEventTimeWindows.of(duration)));
+    }
+
+    @Override
+    public IWindowedUnboundedStream<T>
+    windowBy(int count)
+    {
+        logger.debug("windowBy({})",count);
+        return
+            new FlinkCountWindowedUnboundedStream<>(
+                implementation
+                    .countWindowAll(count));
     }
 
     @Override
@@ -122,11 +168,6 @@ class FlinkUnboundedStream<T>
     protected DataStream<T>
     getImplementation() { return implementation; }
 
-    private Duration
-    toDuration(TimeAmount window)
-    {
-        return Duration.of(window.getSize(),window.getUnits().toChronoUnit());
-    }
 }
 
 //////////////////////////////////////////////////////////////////////////////

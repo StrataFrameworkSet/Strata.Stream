@@ -1,5 +1,5 @@
 //////////////////////////////////////////////////////////////////////////////
-// ITimeWindowedUnboundedStream.java
+// IWindowedUnboundedStream.java
 //////////////////////////////////////////////////////////////////////////////
 
 package strata.stream.core.unbounded;
@@ -7,7 +7,7 @@ package strata.stream.core.unbounded;
 import strata.stream.core.bounded.IBoundedStream;
 
 public
-interface ICountWindowedUnboundedStream<T>
+interface IWindowedUnboundedStream<T>
     extends IUnboundedStream<IBoundedStream<T>> {}
 
 //////////////////////////////////////////////////////////////////////////////

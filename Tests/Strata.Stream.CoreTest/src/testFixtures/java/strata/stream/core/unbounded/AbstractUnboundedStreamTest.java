@@ -8,13 +8,12 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import strata.stream.basic.bounded.BasicBoundedStream;
-import strata.stream.basic.unbounded.MapUnboundedStreamSink;
 import strata.stream.core.bounded.IBoundedStream;
-import strata.stream.core.shared.TimeAmount;
 
 import java.io.IOException;
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -97,10 +96,47 @@ class AbstractUnboundedStreamTest
 
     @Test
     public void
-    testWindowBy() throws Exception
+    testWindowByPlan() throws Exception
     {
-        ITimeWindowedUnboundedStream<String> windowed =
-            subject.windowBy(TimeAmount.of(5,TimeUnit.SECONDS));
+        IWindowedUnboundedStream<String> windowed =
+            subject.windowBy(
+                WindowPlan.ofCountOrDuration(
+                    10,
+                    Duration.of(5,ChronoUnit.SECONDS)));
+
+        await(
+            windowed
+                .map(s -> s.map(e -> e.toUpperCase()))
+                .sinkTo(sink2)
+                .execute(getDriver())
+                .thenCompose(execution -> execution.getResult()));
+
+        assertEquals(1,sink2.getStore().size());
+    }
+
+    @Test
+    public void
+    testWindowByDuration() throws Exception
+    {
+        IWindowedUnboundedStream<String> windowed =
+            subject.windowBy(Duration.of(5,ChronoUnit.SECONDS));
+
+        await(
+            windowed
+                .map(s -> s.map(e -> e.toUpperCase()))
+                .sinkTo(sink2)
+                .execute(getDriver())
+                .thenCompose(execution -> execution.getResult()));
+
+        assertEquals(1,sink2.getStore().size());
+    }
+
+    @Test
+    public void
+    testWindowByCount() throws Exception
+    {
+        IWindowedUnboundedStream<String> windowed =
+            subject.windowBy(6);
 
         await(
             windowed

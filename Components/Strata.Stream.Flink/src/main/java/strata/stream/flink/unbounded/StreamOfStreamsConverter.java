@@ -6,7 +6,7 @@ package strata.stream.flink.unbounded;
 
 import org.apache.flink.streaming.api.functions.windowing.AllWindowFunction;
 import org.apache.flink.streaming.api.functions.windowing.WindowFunction;
-import org.apache.flink.streaming.api.windowing.windows.TimeWindow;
+import org.apache.flink.streaming.api.windowing.windows.Window;
 import org.apache.flink.util.Collector;
 import strata.stream.basic.bounded.BasicBoundedStream;
 import strata.stream.core.bounded.IBoundedStream;
@@ -14,22 +14,22 @@ import strata.stream.core.bounded.IBoundedStream;
 import java.util.stream.StreamSupport;
 
 public
-class StreamOfStreamsConverter<T,K>
+class StreamOfStreamsConverter<T,K,W extends Window>
     implements
         AllWindowFunction<
             T,
             IBoundedStream<T>,
-            TimeWindow>,
+            W>,
         WindowFunction<
             T,
             IBoundedStream<T>,
             K,
-            TimeWindow>
+            W>
 {
     @Override
     public void
     apply(
-        TimeWindow                   window,
+        W                            window,
         Iterable<T>                  input,
         Collector<IBoundedStream<T>> output) throws Exception
     {
@@ -42,7 +42,7 @@ class StreamOfStreamsConverter<T,K>
     public void
     apply(
         K                            key,
-        TimeWindow                   window,
+        W                            window,
         Iterable<T>                  input,
         Collector<IBoundedStream<T>> output) throws Exception
     {

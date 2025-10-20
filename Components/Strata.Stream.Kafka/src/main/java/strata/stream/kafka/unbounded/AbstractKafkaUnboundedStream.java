@@ -11,6 +11,8 @@ import org.apache.logging.log4j.Logger;
 import strata.stream.core.shared.*;
 import strata.stream.core.unbounded.*;
 
+import java.time.Duration;
+
 public abstract
 class AbstractKafkaUnboundedStream<K,T>
     implements IUnboundedStream<T>
@@ -38,15 +40,29 @@ class AbstractKafkaUnboundedStream<K,T>
     }
 
     @Override
-    public ITimeWindowedUnboundedStream<T>
-    windowBy(TimeAmount window)
+    public IWindowedUnboundedStream<T>
+    windowBy(WindowPlan plan)
     {
-        logger.debug("windowBy({})", window.getClass().getName());
+        throw new UnsupportedOperationException("Not yet implemented");
+    }
+
+    @Override
+    public IWindowedUnboundedStream<T>
+    windowBy(Duration duration)
+    {
+        logger.debug("windowBy({})", duration.getClass().getName());
         return
             new KafkaTimeWindowedUnboundedStream<>(
                 implementation.getStream(),
                 implementation.getBuilder(),
-                window);
+                duration);
+    }
+
+    @Override
+    public IWindowedUnboundedStream<T>
+    windowBy(int count)
+    {
+        throw new UnsupportedOperationException("Not yet implemented");
     }
 
     @Override

@@ -6,6 +6,8 @@ package strata.stream.core.unbounded;
 
 import strata.stream.core.shared.*;
 
+import java.time.Duration;
+
 public
 interface IUnboundedStream<T>
     extends IStream<T>
@@ -13,8 +15,14 @@ interface IUnboundedStream<T>
     <K> IKeyedUnboundedStream<K,T>
     keyBy(IKeySelector<K,T> selector);
 
-    ITimeWindowedUnboundedStream<T>
-    windowBy(TimeAmount window);
+    IWindowedUnboundedStream<T>
+    windowBy(WindowPlan plan);
+
+    IWindowedUnboundedStream<T>
+    windowBy(Duration duration);
+
+    IWindowedUnboundedStream<T>
+    windowBy(int count);
 
     @Override
     IExecutableUnboundedStream<T>

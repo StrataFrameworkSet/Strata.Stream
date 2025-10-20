@@ -6,7 +6,7 @@ package strata.stream.basic.bounded;
 
 import strata.stream.core.bounded.IBoundedStream;
 import strata.stream.core.bounded.IBoundedStreamSink;
-import strata.stream.core.bounded.ICountWindowedBoundedStream;
+import strata.stream.core.bounded.IWindowedBoundedStream;
 import strata.stream.core.bounded.IKeyedBoundedStream;
 import strata.stream.core.shared.IConsumer;
 import strata.stream.core.shared.IFunction;
@@ -19,7 +19,7 @@ import java.util.stream.*;
 
 public
 class BasicCountWindowedBoundedStream<T>
-    implements ICountWindowedBoundedStream<T>
+    implements IWindowedBoundedStream<T>
 {
     private final IBoundedStream<IBoundedStream<T>> implementation;
 
@@ -45,7 +45,7 @@ class BasicCountWindowedBoundedStream<T>
     }
 
     @Override
-    public ICountWindowedBoundedStream<IBoundedStream<T>>
+    public IWindowedBoundedStream<IBoundedStream<T>>
     windowBy(long count)
     {
         return new BasicCountWindowedBoundedStream<>(this,count);

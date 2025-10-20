@@ -18,7 +18,7 @@ interface IBoundedStream<T>
     <K> IKeyedBoundedStream<K,T>
     keyBy(IKeySelector<K,T> selector);
 
-    ICountWindowedBoundedStream<T>
+    IWindowedBoundedStream<T>
     windowBy(long count);
 
     @Override

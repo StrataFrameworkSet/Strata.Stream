@@ -4,10 +4,15 @@
 
 package strata.stream.flink.unbounded;
 
+import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.streaming.api.datastream.KeyedStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
+import org.apache.flink.streaming.api.windowing.assigners.TumblingEventTimeWindows;
+import strata.foundation.core.collection.Pair;
 import strata.stream.core.shared.*;
 import strata.stream.core.unbounded.*;
+
+import java.time.Duration;
 
 public
 class FlinkKeyedUnboundedStream<K,T>
@@ -25,14 +30,61 @@ class FlinkKeyedUnboundedStream<K,T>
     public <K> IKeyedUnboundedStream<K,T>
     keyBy(IKeySelector<K,T> selector)
     {
-        return null;
+        return
+            new FlinkKeyedUnboundedStream<>(
+                implementation.keyBy(e -> selector.getKey(e)));
     }
 
     @Override
-    public ITimeWindowedUnboundedStream<T>
-    windowBy(TimeAmount window)
+    public IWindowedUnboundedStream<T>
+    windowBy(WindowPlan plan)
     {
-        return null;
+        Duration duration = null;
+        Integer  count    = null;
+
+        if (plan.isPrimary(Duration.class))
+        {
+            Pair<Duration,Integer> pair = plan.getDurationOrCount();
+
+            duration = pair.getFirst();
+            count    = pair.getSecond();
+        }
+        else
+        {
+            Pair<Integer,Duration> pair = plan.getCountOrDuration();
+
+            count = pair.getFirst();
+            duration = pair.getSecond();
+        }
+
+        return
+            new FlinkTimeWindowedUnboundedStream<>(
+                implementation
+                    .windowAll(TumblingEventTimeWindows.of(duration))
+                    .trigger(DurationLimitedCountTrigger.of(count)));
+    }
+
+    @Override
+    public IWindowedUnboundedStream<T>
+    windowBy(Duration duration)
+    {
+        return
+            new FlinkTimeWindowedUnboundedStream<>(
+                implementation
+                    .assignTimestampsAndWatermarks(
+                        WatermarkStrategy
+                            .<T>forMonotonousTimestamps()
+                            .withTimestampAssigner(new TimestampAssigner<>()))
+                    .windowAll(TumblingEventTimeWindows.of(duration)));
+    }
+
+    @Override
+    public IWindowedUnboundedStream<T>
+    windowBy(int count)
+    {
+        return
+            new FlinkCountWindowedUnboundedStream<>(
+                implementation.countWindowAll(count));
     }
 
     @Override

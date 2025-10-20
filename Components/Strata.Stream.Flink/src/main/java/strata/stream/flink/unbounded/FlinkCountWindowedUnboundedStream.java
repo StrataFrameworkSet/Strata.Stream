@@ -9,7 +9,7 @@ import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.datastream.WindowedStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.windowing.assigners.TumblingEventTimeWindows;
-import org.apache.flink.streaming.api.windowing.windows.TimeWindow;
+import org.apache.flink.streaming.api.windowing.windows.GlobalWindow;
 import strata.foundation.core.collection.Pair;
 import strata.stream.core.bounded.IBoundedStream;
 import strata.stream.core.shared.*;
@@ -18,21 +18,20 @@ import strata.stream.core.unbounded.*;
 import java.time.Duration;
 
 public
-class FlinkTimeWindowedUnboundedStream<T>
+class FlinkCountWindowedUnboundedStream<T>
     implements IWindowedUnboundedStream<T>
 {
     private final DataStream<IBoundedStream<T>> implementation;
 
-    public
-    FlinkTimeWindowedUnboundedStream(AllWindowedStream<T,TimeWindow> imp)
+    public FlinkCountWindowedUnboundedStream(AllWindowedStream<T,GlobalWindow> imp)
     {
         implementation =
-            imp.apply(new StreamOfStreamsConverter<T,Void,TimeWindow>());
+            imp.apply(new StreamOfStreamsConverter<T,Void,GlobalWindow>());
 
     }
 
     public <K>
-    FlinkTimeWindowedUnboundedStream(WindowedStream<T,K,TimeWindow> imp)
+    FlinkCountWindowedUnboundedStream(WindowedStream<T,K,GlobalWindow> imp)
     {
         implementation =
             imp.apply(new StreamOfStreamsConverter<>());
@@ -83,14 +82,17 @@ class FlinkTimeWindowedUnboundedStream<T>
     {
         return
             new FlinkTimeWindowedUnboundedStream<>(
-                implementation.windowAll(TumblingEventTimeWindows.of(duration)));
+                implementation.windowAll(
+                    TumblingEventTimeWindows.of(duration)));
     }
 
     @Override
     public IWindowedUnboundedStream<IBoundedStream<T>>
     windowBy(int count)
     {
-        return null;
+        return
+            new FlinkCountWindowedUnboundedStream<>(
+                implementation.countWindowAll(count));
     }
 
     @Override

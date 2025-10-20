@@ -8,24 +8,25 @@ import org.apache.kafka.streams.StreamsBuilder;
 import org.apache.kafka.streams.kstream.*;
 import org.apache.kafka.streams.kstream.Suppressed.BufferConfig;
 import strata.stream.core.bounded.IBoundedStream;
-import strata.stream.core.shared.TimeAmount;
-import strata.stream.core.unbounded.ITimeWindowedUnboundedStream;
+import strata.stream.core.unbounded.IWindowedUnboundedStream;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 
 public
 class KafkaTimeWindowedUnboundedStream<K,T>
     extends AbstractKafkaUnboundedStream<K,IBoundedStream<T>>
-    implements ITimeWindowedUnboundedStream<T>
+    implements IWindowedUnboundedStream<T>
 {
     @SuppressWarnings("unchecked")
-    public KafkaTimeWindowedUnboundedStream(
+    public
+    KafkaTimeWindowedUnboundedStream(
         KStream<K,T>   s,
         StreamsBuilder b,
-        TimeAmount     window)
+        Duration duration)
     {
-        super(convertToWindowedStream(s,window),b);
+        super(convertToWindowedStream(s,duration),b);
     }
 
     private static <K> K
@@ -41,12 +42,12 @@ class KafkaTimeWindowedUnboundedStream<K,T>
     private static <K,T> KStream<K,IBoundedStream<T>>
     convertToWindowedStream(
         KStream<K,T> input,
-        TimeAmount   window)
+        Duration     duration)
     {
         TimeWindowedKStream<K,T> windowed =
             input
                 .groupBy((k,v) -> getZeroKey(k))
-                .windowedBy(TimeWindows.ofSizeWithNoGrace(window.toDuration()));
+                .windowedBy(TimeWindows.ofSizeWithNoGrace(duration));
         KTable<Windowed<K>,List<T>> aggregated =
             windowed
                 .aggregate(

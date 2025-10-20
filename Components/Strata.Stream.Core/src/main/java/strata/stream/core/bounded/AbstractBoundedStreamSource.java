@@ -28,7 +28,7 @@ class AbstractBoundedStreamSource<T>
     }
 
     @Override
-    public ICountWindowedBoundedStream<T>
+    public IWindowedBoundedStream<T>
     windowBy(long count)
     {
         return getStream().windowBy(count);

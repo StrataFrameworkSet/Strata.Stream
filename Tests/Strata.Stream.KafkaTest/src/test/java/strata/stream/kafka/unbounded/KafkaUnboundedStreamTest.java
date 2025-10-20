@@ -51,9 +51,25 @@ class KafkaUnboundedStreamTest
     @Override
     //@Test
     public void
-    testWindowBy() throws Exception
+    testWindowByPlan() throws Exception
     {
-        super.testWindowBy();
+        super.testWindowByPlan();
+    }
+
+    @Override
+    //@Test
+    public void
+    testWindowByDuration() throws Exception
+    {
+        super.testWindowByDuration();
+    }
+
+    @Override
+    //@Test
+    public void
+    testWindowByCount() throws Exception
+    {
+        super.testWindowByCount();
     }
 
     @Override

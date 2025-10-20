@@ -6,23 +6,27 @@ package strata.stream.core.unbounded;
 
 import strata.stream.core.shared.*;
 
+import java.time.Duration;
+
 public abstract
 class AbstractUnboundedStreamSource<T>
     implements IUnboundedStreamSource<T>
 {
     @Override
     public <K> IKeyedUnboundedStream<K,T>
-    keyBy(IKeySelector<K,T> selector)
-    {
-        return getStream().keyBy(selector);
-    }
+    keyBy(IKeySelector<K,T> selector) { return getStream().keyBy(selector); }
 
     @Override
-    public ITimeWindowedUnboundedStream<T>
-    windowBy(TimeAmount window)
-    {
-        return getStream().windowBy(window);
-    }
+    public IWindowedUnboundedStream<T>
+    windowBy(WindowPlan plan) { return getStream().windowBy(plan); }
+
+    @Override
+    public IWindowedUnboundedStream<T>
+    windowBy(Duration duration) { return getStream().windowBy(duration); }
+
+    @Override
+    public IWindowedUnboundedStream<T>
+    windowBy(int count) { return getStream().windowBy(count); }
 
     @Override
     public IExecutableUnboundedStream<T>
