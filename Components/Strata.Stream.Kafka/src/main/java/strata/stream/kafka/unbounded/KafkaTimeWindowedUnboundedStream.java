@@ -7,6 +7,7 @@ package strata.stream.kafka.unbounded;
 import org.apache.kafka.streams.StreamsBuilder;
 import org.apache.kafka.streams.kstream.*;
 import org.apache.kafka.streams.kstream.Suppressed.BufferConfig;
+import strata.foundation.core.collection.ICollection;
 import strata.stream.core.bounded.IBoundedStream;
 import strata.stream.core.unbounded.IWindowedUnboundedStream;
 
@@ -16,7 +17,7 @@ import java.util.List;
 
 public
 class KafkaTimeWindowedUnboundedStream<K,T>
-    extends AbstractKafkaUnboundedStream<K,IBoundedStream<T>>
+    extends AbstractKafkaUnboundedStream<K,ICollection<T>>
     implements IWindowedUnboundedStream<T>
 {
     @SuppressWarnings("unchecked")
@@ -39,7 +40,7 @@ class KafkaTimeWindowedUnboundedStream<K,T>
                 .orElse((K)"");
     }
 
-    private static <K,T> KStream<K,IBoundedStream<T>>
+    private static <K,T> KStream<K,ICollection<T>>
     convertToWindowedStream(
         KStream<K,T> input,
         Duration     duration)
@@ -58,10 +59,10 @@ class KafkaTimeWindowedUnboundedStream<K,T>
                         new SerializableSerde<>()))
                 .suppress(
                     Suppressed.untilWindowCloses(BufferConfig.unbounded()));
-        KStream<K,IBoundedStream<T>> output =
+        KStream<K,ICollection<T>> output =
             aggregated
                 .toStream()
-                .map(new BoundedStreamMapper<>());
+                .map(new ListMapper<>());
 
         return output;
     }

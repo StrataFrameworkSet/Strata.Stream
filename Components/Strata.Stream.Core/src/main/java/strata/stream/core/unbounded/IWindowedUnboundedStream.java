@@ -4,10 +4,10 @@
 
 package strata.stream.core.unbounded;
 
-import strata.stream.core.bounded.IBoundedStream;
+import strata.foundation.core.collection.ICollection;
 
 public
 interface IWindowedUnboundedStream<T>
-    extends IUnboundedStream<IBoundedStream<T>> {}
+    extends IUnboundedStream<ICollection<T>> {}
 
 //////////////////////////////////////////////////////////////////////////////

@@ -40,7 +40,7 @@ interface IUnboundedStream<T>
     forEach(IConsumer<? super T> action);
 
     IUnboundedStreamExecutor
-    sinkTo(IUnboundedStreamSink<T> sink);
+    sinkTo(IUnboundedStreamSink<? super T> sink);
 }
 
 //////////////////////////////////////////////////////////////////////////////

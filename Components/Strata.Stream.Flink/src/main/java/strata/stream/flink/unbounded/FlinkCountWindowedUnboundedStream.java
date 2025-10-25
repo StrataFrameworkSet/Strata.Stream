@@ -10,6 +10,7 @@ import org.apache.flink.streaming.api.datastream.WindowedStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.windowing.assigners.TumblingEventTimeWindows;
 import org.apache.flink.streaming.api.windowing.windows.GlobalWindow;
+import strata.foundation.core.collection.ICollection;
 import strata.foundation.core.collection.Pair;
 import strata.stream.core.bounded.IBoundedStream;
 import strata.stream.core.shared.*;
@@ -21,12 +22,12 @@ public
 class FlinkCountWindowedUnboundedStream<T>
     implements IWindowedUnboundedStream<T>
 {
-    private final DataStream<IBoundedStream<T>> implementation;
+    private final DataStream<ICollection<T>> implementation;
 
     public FlinkCountWindowedUnboundedStream(AllWindowedStream<T,GlobalWindow> imp)
     {
         implementation =
-            imp.apply(new StreamOfStreamsConverter<T,Void,GlobalWindow>());
+            imp.apply(new StreamOfListsConverter<T,Void,GlobalWindow>());
 
     }
 
@@ -34,13 +35,13 @@ class FlinkCountWindowedUnboundedStream<T>
     FlinkCountWindowedUnboundedStream(WindowedStream<T,K,GlobalWindow> imp)
     {
         implementation =
-            imp.apply(new StreamOfStreamsConverter<>());
+            imp.apply(new StreamOfListsConverter<>());
     }
 
 
     @Override
-    public <K> IKeyedUnboundedStream<K,IBoundedStream<T>>
-    keyBy(IKeySelector<K,IBoundedStream<T>> selector)
+    public <K> IKeyedUnboundedStream<K,ICollection<T>>
+    keyBy(IKeySelector<K,ICollection<T>> selector)
     {
         return
             new FlinkKeyedUnboundedStream<>(
@@ -48,7 +49,7 @@ class FlinkCountWindowedUnboundedStream<T>
     }
 
     @Override
-    public IWindowedUnboundedStream<IBoundedStream<T>>
+    public IWindowedUnboundedStream<ICollection<T>>
     windowBy(WindowPlan plan)
     {
         Duration duration = null;
@@ -77,7 +78,7 @@ class FlinkCountWindowedUnboundedStream<T>
     }
 
     @Override
-    public IWindowedUnboundedStream<IBoundedStream<T>>
+    public IWindowedUnboundedStream<ICollection<T>>
     windowBy(Duration duration)
     {
         return
@@ -87,7 +88,7 @@ class FlinkCountWindowedUnboundedStream<T>
     }
 
     @Override
-    public IWindowedUnboundedStream<IBoundedStream<T>>
+    public IWindowedUnboundedStream<ICollection<T>>
     windowBy(int count)
     {
         return
@@ -96,8 +97,8 @@ class FlinkCountWindowedUnboundedStream<T>
     }
 
     @Override
-    public IExecutableUnboundedStream<IBoundedStream<T>>
-    filter(IPredicate<? super IBoundedStream<T>> predicate)
+    public IExecutableUnboundedStream<ICollection<T>>
+    filter(IPredicate<? super ICollection<T>> predicate)
     {
         return
             new FlinkExecutableUnboundedStream<>(
@@ -107,7 +108,7 @@ class FlinkCountWindowedUnboundedStream<T>
 
     @Override
     public <R> IExecutableUnboundedStream<R>
-    map(IFunction<? super IBoundedStream<T>,? extends R> mapper)
+    map(IFunction<? super ICollection<T>,? extends R> mapper)
     {
         return
             new FlinkExecutableUnboundedStream<>(
@@ -117,7 +118,7 @@ class FlinkCountWindowedUnboundedStream<T>
 
     @Override
     public <R> IExecutableUnboundedStream<R>
-    flatMap(IFunction<IBoundedStream<T>,Iterable<R>> mapper)
+    flatMap(IFunction<ICollection<T>,Iterable<R>> mapper)
     {
         return
             new FlinkExecutableUnboundedStream<>(
@@ -128,7 +129,7 @@ class FlinkCountWindowedUnboundedStream<T>
 
     @Override
     public IUnboundedStreamExecutor
-    forEach(IConsumer<? super IBoundedStream<T>> action)
+    forEach(IConsumer<? super ICollection<T>> action)
     {
         return
             new FlinkUnboundedStreamExecutor(
@@ -137,11 +138,12 @@ class FlinkCountWindowedUnboundedStream<T>
                     .getExecutionEnvironment());
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public IUnboundedStreamExecutor
-    sinkTo(IUnboundedStreamSink<IBoundedStream<T>> sink)
+    sinkTo(IUnboundedStreamSink<? super ICollection<T>> sink)
     {
-        sink.accept(this);
+        ((IUnboundedStreamSink<ICollection<T>>)sink).accept(this);
         return new FlinkUnboundedStreamExecutor(getEnvironment());
     }
 

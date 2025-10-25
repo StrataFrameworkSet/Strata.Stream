@@ -119,12 +119,13 @@ class AbstractKafkaUnboundedStream<K,T>
         return new KafkaUnboundedStreamExecutor(implementation.getBuilder());
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public IUnboundedStreamExecutor
-    sinkTo(IUnboundedStreamSink<T> sink)
+    sinkTo(IUnboundedStreamSink<? super T> sink)
     {
-        logger.debug("sinkTo({})", sink.getClass().getName());
-        sink.accept(this);
+        logger.debug("sinkTo({})",sink.getClass().getName());
+        ((IUnboundedStreamSink<T>)sink).accept(this);
         return new KafkaUnboundedStreamExecutor(implementation.getBuilder());
     }
 

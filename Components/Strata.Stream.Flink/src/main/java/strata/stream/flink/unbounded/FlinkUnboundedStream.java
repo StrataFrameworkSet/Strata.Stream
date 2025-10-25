@@ -148,12 +148,13 @@ class FlinkUnboundedStream<T>
                     .getEnvironment());
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public IUnboundedStreamExecutor
-    sinkTo(IUnboundedStreamSink<T> sink)
+    sinkTo(IUnboundedStreamSink<? super T> sink)
     {
         logger.debug("sinkTo({})",sink);
-        implementation.sinkTo(new SinkAdapter<>(sink));
+        implementation.sinkTo(new SinkAdapter<>((IUnboundedStreamSink<T>)sink));
 
         return
             new FlinkUnboundedStreamExecutor(getEnvironment());

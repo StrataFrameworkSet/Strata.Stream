@@ -58,7 +58,7 @@ class AbstractUnboundedStreamSource<T>
 
     @Override
     public IUnboundedStreamExecutor
-    sinkTo(IUnboundedStreamSink<T> sink)
+    sinkTo(IUnboundedStreamSink<? super T> sink)
     {
         return getStream().sinkTo(sink);
     }

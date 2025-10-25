@@ -7,6 +7,8 @@ package strata.stream.core.unbounded;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import strata.foundation.core.collection.ICollection;
+import strata.foundation.core.collection.SerializableList;
 import strata.stream.basic.bounded.BasicBoundedStream;
 import strata.stream.core.bounded.IBoundedStream;
 
@@ -24,7 +26,7 @@ class AbstractUnboundedStreamTest
 {
     private IUnboundedStream<String> subject;
     private ChronicleMapUnboundedStreamSink<Long,String> sink;
-    private ChronicleMapUnboundedStreamSink<Long,IBoundedStream<String>> sink2;
+    private ChronicleMapUnboundedStreamSink<Long,ICollection<String>> sink2;
 
     @BeforeEach
     @SuppressWarnings("unchecked")
@@ -45,7 +47,7 @@ class AbstractUnboundedStreamTest
         sink2 =
             new ChronicleMapUnboundedStreamSink<>(
                 Long.class,
-                (Class<IBoundedStream<String>>)BasicBoundedStream.of(List.of("")).getClass(),
+                (Class<ICollection<String>>)(Class<?>)SerializableList.class,
                 "chronicle-sink2",
                 "./build/tmp/chronicle-sink2.dat",
                 10.0,
@@ -106,7 +108,13 @@ class AbstractUnboundedStreamTest
 
         await(
             windowed
-                .map(s -> s.map(e -> e.toUpperCase()))
+                .map(
+                    collection ->
+                        SerializableList.of(
+                            collection
+                                .stream()
+                                .map(e -> e.toUpperCase())
+                                .toList()))
                 .sinkTo(sink2)
                 .execute(getDriver())
                 .thenCompose(execution -> execution.getResult()));
@@ -123,7 +131,13 @@ class AbstractUnboundedStreamTest
 
         await(
             windowed
-                .map(s -> s.map(e -> e.toUpperCase()))
+                .map(
+                    collection ->
+                        SerializableList.of(
+                            collection
+                                .stream()
+                                .map(e -> e.toUpperCase())
+                                .toList()))
                 .sinkTo(sink2)
                 .execute(getDriver())
                 .thenCompose(execution -> execution.getResult()));
@@ -140,7 +154,14 @@ class AbstractUnboundedStreamTest
 
         await(
             windowed
-                .map(s -> s.map(e -> e.toUpperCase()))
+                .map(
+                    collection ->
+                        (ICollection<String>)
+                            SerializableList.of(
+                                collection
+                                    .stream()
+                                    .map(e -> e.toUpperCase())
+                                    .toList()))
                 .sinkTo(sink2)
                 .execute(getDriver())
                 .thenCompose(execution -> execution.getResult()));

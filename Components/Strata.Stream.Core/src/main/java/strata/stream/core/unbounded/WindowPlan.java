@@ -9,57 +9,47 @@ import strata.foundation.core.collection.Pair;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.Objects;
-import java.util.Optional;
 
 public
 class WindowPlan
 {
     private final Pair<Object,Object> plan;
 
+    public final static Duration DEFAULT_DURATION = Duration.ofSeconds(30);
+    public final static Integer  DEFAULT_COUNT = 500;
+
     public
     WindowPlan(Duration primary)
     {
         Objects.requireNonNull(primary);
-        plan = Pair.of(primary, null);
+        plan = Pair.of(primary, DEFAULT_COUNT);
     }
 
     public
     WindowPlan(Duration primary,Integer secondary)
     {
         Objects.requireNonNull(primary);
-        plan = Pair.of(primary, secondary);
+        plan =
+            Pair.of(
+                primary,
+                Objects.nonNull(secondary) ? secondary : DEFAULT_COUNT);
     }
 
     public
     WindowPlan(Integer primary)
     {
         Objects.requireNonNull(primary);
-        plan = Pair.of(primary, null);
+        plan = Pair.of(primary, DEFAULT_DURATION);
     }
 
     public
     WindowPlan(Integer primary,Duration secondary)
     {
         Objects.requireNonNull(primary);
-        plan = Pair.of(primary, secondary);
-    }
-
-    public Pair<Duration,Integer>
-    getDurationOrCount()
-    {
-        return
+        plan =
             Pair.of(
-                getPrimary(Duration.class),
-                getSecondary(Integer.class).orElse(500));
-    }
-
-    public Pair<Integer,Duration>
-    getCountOrDuration()
-    {
-        return
-            Pair.of(
-                getPrimary(Integer.class),
-                getSecondary(Duration.class).orElse(Duration.ofSeconds(30)));
+                primary,
+                Objects.nonNull(secondary) ? secondary : DEFAULT_DURATION);
     }
 
     public <T> T
@@ -71,20 +61,30 @@ class WindowPlan
         return type.cast(plan.getFirst());
     }
 
-    public <T> Optional<T>
+    public <T> T
     getSecondary(Class<T> type)
-        throws IllegalArgumentException
+        throws IllegalArgumentException,ClassCastException
     {
         validateType(type);
+        return type.cast(plan.getSecond());
+    }
 
-        try
-        {
-            return Optional.ofNullable(type.cast(plan.getSecond()));
-        }
-        catch (ClassCastException ex)
-        {
-            return Optional.empty();
-        }
+    public Pair<Duration,Integer>
+    getDurationOrCount()
+    {
+        return
+            Pair.of(
+                getPrimary(Duration.class),
+                getSecondary(Integer.class));
+    }
+
+    public Pair<Integer,Duration>
+    getCountOrDuration()
+    {
+        return
+            Pair.of(
+                getPrimary(Integer.class),
+                getSecondary(Duration.class));
     }
 
     public <T> boolean
