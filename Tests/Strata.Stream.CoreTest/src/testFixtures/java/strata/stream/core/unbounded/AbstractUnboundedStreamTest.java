@@ -11,6 +11,7 @@ import strata.foundation.core.collection.ICollection;
 import strata.foundation.core.collection.SerializableList;
 import strata.stream.basic.bounded.BasicBoundedStream;
 import strata.stream.core.bounded.IBoundedStream;
+import strata.stream.core.shared.StreamCollector;
 
 import java.io.IOException;
 import java.time.Duration;
@@ -110,11 +111,10 @@ class AbstractUnboundedStreamTest
             windowed
                 .map(
                     collection ->
-                        SerializableList.of(
-                            collection
-                                .stream()
-                                .map(e -> e.toUpperCase())
-                                .toList()))
+                        collection
+                            .stream()
+                            .map(e -> e.toUpperCase())
+                            .collect(StreamCollector.toList()))
                 .sinkTo(sink2)
                 .execute(getDriver())
                 .thenCompose(execution -> execution.getResult()));
@@ -133,11 +133,10 @@ class AbstractUnboundedStreamTest
             windowed
                 .map(
                     collection ->
-                        SerializableList.of(
-                            collection
-                                .stream()
-                                .map(e -> e.toUpperCase())
-                                .toList()))
+                        collection
+                            .stream()
+                            .map(e -> e.toUpperCase())
+                            .collect(StreamCollector.toList()))
                 .sinkTo(sink2)
                 .execute(getDriver())
                 .thenCompose(execution -> execution.getResult()));
@@ -156,12 +155,10 @@ class AbstractUnboundedStreamTest
             windowed
                 .map(
                     collection ->
-                        (ICollection<String>)
-                            SerializableList.of(
-                                collection
-                                    .stream()
-                                    .map(e -> e.toUpperCase())
-                                    .toList()))
+                        collection
+                            .stream()
+                            .map(e -> e.toUpperCase())
+                            .collect(StreamCollector.toList()))
                 .sinkTo(sink2)
                 .execute(getDriver())
                 .thenCompose(execution -> execution.getResult()));
