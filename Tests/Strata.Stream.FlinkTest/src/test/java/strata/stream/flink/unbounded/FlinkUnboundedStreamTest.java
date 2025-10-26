@@ -9,6 +9,7 @@ import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+import strata.foundation.core.collection.ICollection;
 import strata.stream.core.bounded.IBoundedStream;
 import strata.stream.core.shared.IFunction;
 import strata.stream.core.unbounded.*;
@@ -27,9 +28,10 @@ class FlinkUnboundedStreamTest
     public static void
     registerFlatMapReturnTypes()
     {
-        FlinkFlatMapFunctionAdapter.registerReturnType(
-            (IFunction<IBoundedStream<String>,Iterable<String>>)s -> s.collect(Collectors.toList()),
-            String.class);
+        FlinkFlatMapFunctionAdapter
+            .registerReturnType(
+                (IFunction<IBoundedStream<String>,Iterable<String>>)s -> s.collect(Collectors.toList()),
+                String.class);
     }
 
     @Test
