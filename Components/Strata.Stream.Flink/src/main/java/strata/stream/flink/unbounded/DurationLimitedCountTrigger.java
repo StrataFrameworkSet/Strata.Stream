@@ -45,7 +45,10 @@ class DurationLimitedCountTrigger<T>
         ctx.registerEventTimeTimer(window.maxTimestamp());
 
         if (count >= maxCount)
+        {
+            countState.clear();
             return TriggerResult.FIRE_AND_PURGE;
+        }
 
         return TriggerResult.CONTINUE;
     }

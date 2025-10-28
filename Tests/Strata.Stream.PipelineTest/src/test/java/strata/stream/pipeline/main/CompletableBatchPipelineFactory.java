@@ -19,6 +19,7 @@ import strata.stream.pipeline.context.PipelineContext;
 import strata.stream.pipeline.enrichment.CompletableEnricherMapper;
 import strata.stream.pipeline.enrichment.StringBangCompletableEnricher;
 import strata.stream.pipeline.shared.CompletableStringLogger;
+import strata.stream.pipeline.shared.CompletableWindowLogger;
 import strata.stream.pipeline.transformation.CompletableTransformerMapper;
 import strata.stream.pipeline.transformation.LongToStringCompletableTransformer;
 import strata.stream.pipeline.unbounded.CompletableContextHistorySink;
@@ -59,17 +60,22 @@ class CompletableBatchPipelineFactory
     protected IUnboundedStreamExecutor
     configure(IUnboundedStreamSource<Long> source)
     {
+        CompletableWindowLogger<Long> windowLogger = new CompletableWindowLogger<>();
+
+        CompletableWindowLogger.initialize();
+
         return
             CompletableUnboundedStreamExecutor.of(
                 source
                     .windowBy(
                         WindowPlan.ofCountOrDuration(
-                            3,
-                            Duration.of(50,ChronoUnit.MILLIS)))
+                            5,
+                            Duration.of(5,ChronoUnit.SECONDS)))
                     .map(
                         i ->
                             CompletableStreamStage.of(
                                 () -> PipelineContext.of("Test",i),executor))
+                    .map(windowLogger)
                     .map(
                         CompletableBatchValidatorFilter.of(
                             "Long>0",
