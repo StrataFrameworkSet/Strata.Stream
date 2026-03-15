@@ -53,6 +53,7 @@ class SuppliedExecutor
         out.writeObject(supplier);
     }
 
+    @SuppressWarnings("unchecked")
     private void
     readObject(ObjectInputStream in) throws IOException, ClassNotFoundException
     {

@@ -42,7 +42,7 @@ dependencies {
     api project(":Components:Strata.Stream.Basic")
     api "org.apache.flink:flink-streaming-java:$flink_version"
     api "org.apache.flink:flink-clients:$flink_version"
-    api "org.apache.flink:flink-connector-kafka:4.0.1-2.0"
+    api "org.apache.flink:flink-connector-kafka:$flink_connector_kafka_version"
     api "org.apache.flink:flink-connector-files:$flink_version"
     api "org.apache.flink:flink-avro-confluent-registry:$flink_version"
     api "io.confluent:kafka-avro-serializer:$confluent_kafka_streams_version"

@@ -16,6 +16,7 @@ import strata.stream.flink.unbounded.FlinkFlatMapFunctionAdapter;
 import strata.stream.pipeline.concurrent.CompletableExecutionResult;
 import strata.stream.pipeline.concurrent.CompletableStreamStage;
 
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 import static strata.foundation.core.concurrent.Awaiter.await;
@@ -44,6 +45,10 @@ class CompletableBatchPipelineTest
     {
         factory = new CompletableBatchPipelineFactory();
         pipeline = factory.create(Long.class,"CompletableBatchPipeline");
+
+        Optional<String> foo = Optional.of("foo");
+
+        String message = foo.map(s -> s + "bar").orElse("baz");
     }
 
     @Test
