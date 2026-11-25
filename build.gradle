@@ -3,10 +3,12 @@ wrapper.jarFile = ".gradle/wrapper/gradle-wrapper.jar"
 
 
 ext {
+    strata_foundation_version = "1.0.0"
+
     spring_version = "6.2.2"
     springboot_version = "3.4.1"
 
-    hibernate_version = "6.4.4.Final"
+    hibernate_version = "6.6.4.Final"
 
     flink_version = "1.20.2"
     flink_connector_kafka_version = "4.0.1-2.0"
@@ -19,8 +21,30 @@ ext {
 
     major = "1"
     minor = ".0"
-    patch = "-SNAPSHOT"
+    patch = ".0-SNAPSHOT"
 }
 
 group = 'strata.stream'
 version = "$major$minor$patch"
+
+subprojects {
+    apply plugin: 'java'
+
+    group 'strata.stream'
+    version "$major$minor$patch"
+
+    java {
+        toolchain {
+            languageVersion = JavaLanguageVersion.of(23)
+            vendor = JvmVendorSpec.AMAZON
+        }
+    }
+
+    compileJava {
+        options.release = 23
+    }
+
+    compileTestJava {
+        options.release = 23
+    }
+}

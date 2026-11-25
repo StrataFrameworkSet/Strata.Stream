@@ -38,5 +38,5 @@ publishing {
 }
 
 dependencies {
-    api "strata.foundation:strata-foundation-core:$version"
+    api "strata.foundation:strata-foundation-core:$strata_foundation_version"
 }

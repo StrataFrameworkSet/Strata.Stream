@@ -13,7 +13,7 @@ sourceSets {
 }
 
 group = 'strata.stream'
-version = '1.0-SNAPSHOT'
+version = "$major$minor$patch"
 
 dependencies {
     api project(':Components:Strata.Stream.Core')

@@ -1,7 +1,8 @@
 # Strata.Stream
 
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Build Status](https://img.shields.io/badge/build-passing-brightgreen.svg)]()
-[![Version](https://img.shields.io/badge/version-1.0--SNAPSHOT-orange.svg)]()
+[![Version](https://img.shields.io/badge/version-1.0.0--SNAPSHOT-orange.svg)]()
 
 Stream processing components and utilities for building robust, scalable enterprise streaming applications in the Strata Framework Set. This library provides core stream abstractions, Apache Flink integration, Apache Kafka integration, pipeline processing, and enterprise patterns for building high-performance stream processing applications.
 
@@ -121,24 +122,19 @@ Pipeline processing component providing advanced workflow and context management
 
 ## Installation
 
+The current development version is **1.0.0-SNAPSHOT**, built against Strata.Foundation **1.0.0** (see [Versioning](#versioning)).
+
 ### Gradle
 
 Add the following dependencies to your `build.gradle`:
 
 ```gradle
 dependencies {
-    implementation 'strata.stream:strata-stream-core:1.0-SNAPSHOT'
-    implementation 'strata.stream:strata-stream-basic:1.0-SNAPSHOT'
-    implementation 'strata.stream:strata-stream-flink:1.0-SNAPSHOT'
-    implementation 'strata.stream:strata-stream-kafka:1.0-SNAPSHOT'
-    implementation 'strata.stream:strata-stream-pipeline:1.0-SNAPSHOT'
-
-    // For testing
-    testImplementation 'strata.stream:strata-stream-core-test:1.0-SNAPSHOT'
-    testImplementation 'strata.stream:strata-stream-basic-test:1.0-SNAPSHOT'
-    testImplementation 'strata.stream:strata-stream-flink-test:1.0-SNAPSHOT'
-    testImplementation 'strata.stream:strata-stream-kafka-test:1.0-SNAPSHOT'
-    testImplementation 'strata.stream:strata-stream-pipeline-test:1.0-SNAPSHOT'
+    implementation 'strata.stream:strata-stream-core:1.0.0-SNAPSHOT'
+    implementation 'strata.stream:strata-stream-basic:1.0.0-SNAPSHOT'
+    implementation 'strata.stream:strata-stream-flink:1.0.0-SNAPSHOT'
+    implementation 'strata.stream:strata-stream-kafka:1.0.0-SNAPSHOT'
+    implementation 'strata.stream:strata-stream-pipeline:1.0.0-SNAPSHOT'
 }
 ```
 
@@ -151,61 +147,37 @@ Add the following dependencies to your `pom.xml`:
     <dependency>
         <groupId>strata.stream</groupId>
         <artifactId>strata-stream-core</artifactId>
-        <version>1.0-SNAPSHOT</version>
+        <version>1.0.0-SNAPSHOT</version>
     </dependency>
     <dependency>
         <groupId>strata.stream</groupId>
         <artifactId>strata-stream-basic</artifactId>
-        <version>1.0-SNAPSHOT</version>
+        <version>1.0.0-SNAPSHOT</version>
     </dependency>
     <dependency>
         <groupId>strata.stream</groupId>
         <artifactId>strata-stream-flink</artifactId>
-        <version>1.0-SNAPSHOT</version>
+        <version>1.0.0-SNAPSHOT</version>
     </dependency>
     <dependency>
         <groupId>strata.stream</groupId>
         <artifactId>strata-stream-kafka</artifactId>
-        <version>1.0-SNAPSHOT</version>
+        <version>1.0.0-SNAPSHOT</version>
     </dependency>
     <dependency>
         <groupId>strata.stream</groupId>
         <artifactId>strata-stream-pipeline</artifactId>
-        <version>1.0-SNAPSHOT</version>
-    </dependency>
-
-    <!-- For testing -->
-    <dependency>
-        <groupId>strata.stream</groupId>
-        <artifactId>strata-stream-core-test</artifactId>
-        <version>1.0-SNAPSHOT</version>
-        <scope>test</scope>
-    </dependency>
-    <dependency>
-        <groupId>strata.stream</groupId>
-        <artifactId>strata-stream-basic-test</artifactId>
-        <version>1.0-SNAPSHOT</version>
-        <scope>test</scope>
-    </dependency>
-    <dependency>
-        <groupId>strata.stream</groupId>
-        <artifactId>strata-stream-flink-test</artifactId>
-        <version>1.0-SNAPSHOT</version>
-        <scope>test</scope>
-    </dependency>
-    <dependency>
-        <groupId>strata.stream</groupId>
-        <artifactId>strata-stream-kafka-test</artifactId>
-        <version>1.0-SNAPSHOT</version>
-        <scope>test</scope>
-    </dependency>
-    <dependency>
-        <groupId>strata.stream</groupId>
-        <artifactId>strata-stream-pipeline-test</artifactId>
-        <version>1.0-SNAPSHOT</version>
-        <scope>test</scope>
+        <version>1.0.0-SNAPSHOT</version>
     </dependency>
 </dependencies>
+```
+
+### Docker Images
+
+The integration test suite is published to GitHub Container Registry:
+
+```bash
+docker pull ghcr.io/johnliebenau/strata/strata-stream-testsuite:1.0.0-<yyyyMMddHHmmss>
 ```
 
 ### Repository Configuration
@@ -224,6 +196,24 @@ repositories {
     }
 }
 ```
+
+GitHub Packages requires authentication even for downloads; use a personal access token with the `read:packages` scope.
+
+## Versioning
+
+| | Development snapshot | Release |
+|---|---|---|
+| Maven jars | `X.Y.0-SNAPSHOT` (e.g. `1.0.0-SNAPSHOT`) | `X.Y.0` (e.g. `1.0.0`) |
+| Docker image | `X.Y.0-<yyyyMMddHHmmss>` (one per pipeline run) | `X.Y.0` |
+
+- `.github/workflows/build-pipeline.yml` runs on `development` and `release-*`. Its stages are:
+  - **commit**: build and test, and push the testsuite image
+  - **integration**: a placeholder (Strata.Stream has no `IntegrationStage` tests yet)
+  - **acceptance**: a placeholder
+  - **deploy**: publish the snapshot jars to GitHub Packages
+- A release is made on a `release-X.Y` branch:
+  - its last snapshot is promoted to the release version with `strata-stream-promote.ps1` / `strata-stream-promote.sh` (run with `--dry-run` / `-DryRun` first). The jars are republished as `X.Y.0`, and the newest `X.Y.0-<timestamp>` testsuite image (or `--image-tag` / `-ImageTag`) is tagged `X.Y.0`
+  - `development` then moves on to the next minor version
 
 ## Usage
 
@@ -549,10 +539,8 @@ FlinkExecutableUnboundedStream<OrderEvent> executable =
 
 ### Prerequisites
 
-- Java 11 or higher
-- Gradle 7.0 or higher
-- Apache Flink 2.1.0 or higher (for Flink integration)
-- Apache Kafka 3.9.1 or higher (for Kafka integration)
+- Java 23 (Amazon Corretto; resolved by the Gradle toolchain)
+- Gradle 8.14 (via the included wrapper)
 
 ### Build Commands
 
@@ -585,7 +573,10 @@ Strata.Stream/
 │   ├── Strata.Stream.BasicTest/    # Basic implementation tests
 │   ├── Strata.Stream.FlinkTest/    # Flink integration tests
 │   ├── Strata.Stream.KafkaTest/    # Kafka integration tests
-│   └── Strata.Stream.PipelineTest/ # Pipeline processing tests
+│   ├── Strata.Stream.PipelineTest/ # Pipeline processing tests
+│   └── Strata.Stream.TestSuite/    # Test suite image (Jib)
+├── gradle/strata-image.gradle      # Build image tagging
+├── strata-stream-promote.sh/.ps1   # Snapshot-to-release promotion
 ├── build.gradle                    # Root build configuration
 ├── settings.gradle                 # Gradle settings
 └── README.md                       # This file
@@ -593,12 +584,11 @@ Strata.Stream/
 
 ## Requirements
 
-- Java 11 or later
-- Apache Flink 1.20.2 or later (for Flink integration)
-- Apache Kafka 3.9.1 or later (for Kafka integration)
-- Spring Boot 3.1.3 or later (for Spring integration)
-- Hibernate 5.6.11.Final or later (for persistence integration)
-- Gradle 7.0+ or Maven 3.6+
+- Java 23 or later
+- Strata.Foundation 1.0.0
+- Apache Flink 1.20.2 (for Flink integration)
+- Apache Kafka 3.9.1 (for Kafka integration)
+- Gradle 8.14+ or Maven 3.6+
 
 ## Contributing
 
@@ -654,6 +644,8 @@ For questions, issues, or contributions, please:
 ## Related Projects
 
 - [Strata.Foundation](https://github.com/StrataFrameworkSet/Strata.Foundation) - Foundational components and utilities
+- [Strata.Server](https://github.com/StrataFrameworkSet/Strata.Server) - Server-side components and utilities
+- [Strata.Outbox](https://github.com/StrataFrameworkSet/Strata.Outbox) - Transactional outbox components
 
 ---
 
